@@ -10,3 +10,16 @@ export const apiRoot = `${API_PREFIX}/${API_VERSION}`;
 export function apiPath(path: string): string {
   return path.startsWith('/') ? `${apiRoot}${path}` : `${apiRoot}/${path}`;
 }
+
+export const LISTING_CATEGORIES = [
+  'vehicles',
+  'real-estate',
+  'electronics',
+  'furniture',
+  'jobs',
+  'fashion',
+] as const;
+
+export const LISTING_CONDITIONS = ['new', 'like_new', 'good', 'fair', 'poor'] as const;
+
+export const LISTING_SORTS = ['newest', 'price_asc', 'price_desc'] as const;

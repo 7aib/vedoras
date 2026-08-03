@@ -15,7 +15,18 @@ export function validate(schema: ZodType, source: Source = 'body') {
       next(new ZodError(result.error.issues));
       return;
     }
-    (req as Record<Source, unknown>)[source] = result.data;
+    if (source === 'query') {
+      // In Express 5 `req.query` is a getter-only accessor; shadow it with
+      // an own data property holding the validated result.
+      Object.defineProperty(req, 'query', {
+        value: result.data,
+        configurable: true,
+        writable: true,
+        enumerable: true,
+      });
+    } else {
+      (req as Record<Source, unknown>)[source] = result.data;
+    }
     next();
   };
 }
