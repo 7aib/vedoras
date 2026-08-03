@@ -6,6 +6,10 @@ const envSchema = z.object({
   API_VERSION: z.string().default('v1'),
   CLIENT_URL: z.string().url().default('http://localhost:5173'),
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
+  TRUST_PROXY: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
   RATE_LIMIT_WINDOW_MS: z.coerce
     .number()
     .int()

@@ -3,16 +3,31 @@ import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
+import morgan, { type TokenIndexer } from 'morgan';
+import type { Request } from 'express';
 import { env } from './config/env.js';
 import logger from './config/logger.js';
 import v1Routes from './routes/v1/index.js';
 import { notFoundHandler } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { requestId } from './middleware/requestId.js';
+import { createRateLimiter } from './middleware/rateLimiter.js';
+import { apiRoot } from './utils/constants.js';
+
+// Morgan token exposing the correlation id assigned by requestId middleware.
+morgan.token('requestId', (req: Request & TokenIndexer<Request>) => req.id);
+
+const httpLogFormat =
+  ':requestId :method :url HTTP/:http-version :status :response-time ms - :remote-addr :user-agent';
 
 export function createApp(): Express {
   const app = express();
+
+  // Trust the first hop when running behind a reverse proxy (env-controlled).
+  app.set('trust proxy', env.TRUST_PROXY);
+
+  // --- Correlation ids for every request ---
+  app.use(requestId);
 
   // --- Security headers ---
   app.use(helmet());
@@ -24,7 +39,7 @@ export function createApp(): Express {
       origin: allowedOrigins,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
     }),
   );
 
@@ -36,23 +51,21 @@ export function createApp(): Express {
   // --- Compression ---
   app.use(compression());
 
-  // --- HTTP logging ---
+  // --- Structured HTTP logging ---
   if (env.NODE_ENV !== 'test') {
-    app.use(morgan('combined', { stream: { write: (msg) => logger.http(msg.trim()) } }));
+    app.use(
+      morgan(httpLogFormat, {
+        stream: { write: (msg: string) => logger.http(msg.trim()) },
+        skip: (req) => req.originalUrl === apiRoot,
+      }),
+    );
   }
 
   // --- Global rate limiting ---
-  app.use(
-    rateLimit({
-      windowMs: env.RATE_LIMIT_WINDOW_MS,
-      max: env.RATE_LIMIT_MAX,
-      standardHeaders: 'draft-7',
-      legacyHeaders: false,
-    }),
-  );
+  app.use(createRateLimiter());
 
   // --- API routes (versioned) ---
-  app.use(`/api/${env.API_VERSION}`, v1Routes);
+  app.use(apiRoot, v1Routes);
 
   // --- Health for the root path ---
   app.get('/', (_req, res) => {

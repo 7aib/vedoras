@@ -3,9 +3,19 @@ import { env } from './env.js';
 
 const { combine, timestamp, printf, colorize, json } = winston.format;
 
+interface LogMeta {
+  [key: string]: unknown;
+  requestId?: string;
+}
+
 const devFormat = printf(({ level, message, timestamp: ts, ...meta }) => {
-  const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
-  return `${ts} [${level}] ${message}${metaStr}`;
+  const logMeta = meta as LogMeta;
+  const requestId = logMeta.requestId ? ` [${logMeta.requestId}]` : '';
+  const extras = Object.entries(logMeta)
+    .filter(([key]) => key !== 'requestId')
+    .map(([key, value]) => `${key}=${JSON.stringify(value)}`);
+  const metaStr = extras.length ? ` ${extras.join(' ')}` : '';
+  return `${ts} ${level}${requestId} ${String(message)}${metaStr}`;
 });
 
 const logger = winston.createLogger({

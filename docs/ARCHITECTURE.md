@@ -65,7 +65,7 @@ Two npm workspaces under a single root:
 ```
 server/
 ├── src/
-│   ├── index.ts            # bootstrap: connect DB → start HTTP + Socket.io
+│   ├── index.ts            # bootstrap: process safety, connect DB → start server
 │   ├── app.ts              # Express app factory (middleware, routes)
 │   ├── config/
 │   │   ├── env.ts          # validated environment variables (Zod)
@@ -73,26 +73,17 @@ server/
 │   │   ├── logger.ts       # Winston logger
 │   │   └── cloudinary.ts   # Cloudinary config (M6)
 │   ├── routes/             # versioned route definitions
-│   │   ├── v1/
-│   │   │   ├── index.ts    # /api/v1 router aggregator
-│   │   │   ├── auth.routes.ts
-│   │   │   ├── user.routes.ts
-│   │   │   ├── listing.routes.ts
-│   │   │   ├── category.routes.ts
-│   │   │   ├── chat.routes.ts
-│   │   │   ├── favorite.routes.ts
-│   │   │   ├── report.routes.ts
-│   │   │   └── notification.routes.ts
-│   │   └── admin.routes.ts # admin dashboard routes (M11)
+│   │   └── v1/             # /api/v1 router aggregator + domain routes
 │   ├── controllers/        # request/response handling (thin)
 │   ├── services/           # business logic (thick)
 │   ├── models/             # Mongoose schemas/models
-│   ├── middleware/         # auth, authorize, validate, error, notFound, rateLimit, upload
+│   ├── middleware/         # requestId, httpLog(morgan), rateLimit, auth, authorize, validate, error, notFound, upload
 │   ├── validators/         # Zod schemas shared with request validation
 │   ├── socket/             # Socket.io setup & event handlers (M9)
-│   ├── utils/              # jwt, passwords, asyncHandler, ApiResponse, ApiError
+│   ├── utils/              # ApiError, ApiResponse, asyncHandler, constants, appInfo
+│   ├── types/              # shared TypeScript types (express augmentation, env)
 │   ├── uploads/            # temporary multer storage (gitignored)
-│   └── types/              # shared TypeScript types (env, express augmentation)
+│   └── ...
 ├── tests/                  # unit + integration tests (vitest/supertest)
 ├── logs/                   # winston output (gitignored)
 ├── .env.example
@@ -166,16 +157,18 @@ client/
   ```
 - Standard error payload:
   ```json
-  { "success": false, "message": "...", "errors": [] }
+  { "success": false, "message": "...", "errors": [], "requestId": "..." }
   ```
-- HTTP status codes follow REST conventions (200/201/204/400/401/403/404/409/429/500).
+- Every response carries an `X-Request-Id` header (correlation id, also readable
+  from a client-provided `x-request-id` header).
+- HTTP status codes follow REST conventions (200/201/204/400/401/403/404/409/413/429/500).
 
 ## 7. Milestone Roadmap
 
 | # | Milestone                          | Status |
 |---|------------------------------------|--------|
-| 1 | Project planning & scaffolding     | in-progress |
-| 2 | Backend foundation                 | planned |
+| 1 | Project planning & scaffolding     | ✅ done |
+| 2 | Backend foundation                 | ✅ done |
 | 3 | Backend auth (JWT, refresh)        | planned |
 | 4 | Frontend auth                      | planned |
 | 5 | Listings CRUD                      | planned |
