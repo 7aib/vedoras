@@ -1,9 +1,13 @@
 import { Link } from 'react-router';
-import { CATEGORY_LABELS, CONDITION_LABELS, formatPrice } from '@/utils/constants';
+import { useAppSelector } from '@/store/hooks';
+import { selectCategoryMap } from '@/store/slices/categorySlice';
+import { humanizeSlug, CONDITION_LABELS, formatPrice } from '@/utils/constants';
 import type { SafeListing } from '@/types/listing';
 
 export function ListingCard({ listing }: { listing: SafeListing }) {
   const cover = listing.images[0];
+  const categoryMap = useAppSelector(selectCategoryMap);
+  const categoryName = categoryMap[listing.category] ?? humanizeSlug(listing.category);
 
   return (
     <Link
@@ -46,7 +50,7 @@ export function ListingCard({ listing }: { listing: SafeListing }) {
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-center gap-2 text-xs">
           <span className="rounded-full bg-brand-100 px-2.5 py-0.5 font-medium text-brand-700 dark:bg-brand-900 dark:text-brand-300">
-            {CATEGORY_LABELS[listing.category]}
+            {categoryName}
           </span>
           <span className="text-gray-400 dark:text-gray-500">
             {CONDITION_LABELS[listing.condition]}

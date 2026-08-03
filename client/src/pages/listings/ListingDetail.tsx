@@ -4,8 +4,9 @@ import toast from 'react-hot-toast';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { clearDetail, deleteListing, fetchListingDetail } from '@/store/slices/listingSlice';
 import { useAuth } from '@/hooks/useAuth';
+import { useCategories } from '@/hooks/useCategories';
 import { PageLoader } from '@/components/auth/PageLoader';
-import { CATEGORY_LABELS, CONDITION_LABELS, formatPrice } from '@/utils/constants';
+import { CONDITION_LABELS, formatPrice } from '@/utils/constants';
 
 function initialsOf(name: string): string {
   return name
@@ -72,6 +73,7 @@ export function ListingDetailPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { categoryName } = useCategories();
   const { listing, status } = useAppSelector((state) => state.listings.detail);
 
   useEffect(() => {
@@ -118,7 +120,7 @@ export function ListingDetailPage() {
   const isOwner = user?._id === listing.seller._id;
   const detailRows: { label: string; value: string }[] = [
     { label: 'Condition', value: CONDITION_LABELS[listing.condition] },
-    { label: 'Category', value: CATEGORY_LABELS[listing.category] },
+    { label: 'Category', value: categoryName(listing.category) },
     ...(listing.location ? [{ label: 'Location', value: listing.location }] : []),
     { label: 'Views', value: String(listing.views) },
     {

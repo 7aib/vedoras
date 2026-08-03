@@ -1,13 +1,9 @@
-import type { ListingCategory, ListingCondition, ListingSort } from '@/types/listing';
+import type { ListingCondition, ListingSort } from '@/types/listing';
 
-export const CATEGORY_LABELS: Record<ListingCategory, string> = {
-  vehicles: 'Vehicles',
-  'real-estate': 'Real Estate',
-  electronics: 'Electronics',
-  furniture: 'Furniture',
-  jobs: 'Jobs',
-  fashion: 'Fashion',
-};
+/** Converts a slug to a human label, e.g. `vehicles-cars` → `Vehicles Cars`. */
+export function humanizeSlug(slug: string): string {
+  return slug.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+}
 
 export const CONDITION_LABELS: Record<ListingCondition, string> = {
   new: 'New',

@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
-import { CATEGORY_LABELS } from '@/utils/constants';
-import type { ListingCategory } from '@/types/listing';
+import { useCategories } from '@/hooks/useCategories';
 
 const steps = [
   {
@@ -22,6 +21,7 @@ const steps = [
 export function HomePage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
+  const { tree: categories } = useCategories();
 
   const search = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -38,7 +38,7 @@ export function HomePage() {
         className="flex flex-col items-center gap-6 py-16 text-center sm:py-24"
       >
         <span className="rounded-full bg-brand-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-brand-700 dark:bg-brand-900 dark:text-brand-300">
-          Milestone 5 · Listings
+          Milestone 6 · Images & Categories
         </span>
         <h1 className="font-display max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-6xl">
           Buy and sell anything
@@ -92,19 +92,19 @@ export function HomePage() {
           Browse categories
         </h2>
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          {(Object.keys(CATEGORY_LABELS) as ListingCategory[]).map((category, index) => (
+          {categories.map((category, index) => (
             <motion.div
-              key={category}
+              key={category.slug}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
             >
               <Link
-                to={`/listings?category=${category}`}
+                to={`/listings?category=${category.slug}`}
                 className="block rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover dark:border-gray-800 dark:bg-gray-900"
               >
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {CATEGORY_LABELS[category]}
+                  {category.name}
                 </span>
                 <span className="mt-1 block text-xs text-gray-500 dark:text-gray-400">
                   Browse now

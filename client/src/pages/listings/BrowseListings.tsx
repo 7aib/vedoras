@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { motion } from 'framer-motion';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchBrowseListings } from '@/store/slices/listingSlice';
+import { useCategories } from '@/hooks/useCategories';
 import { ListingCard } from '@/components/listings/ListingCard';
 import { EmptyState } from '@/components/listings/EmptyState';
 import { Pagination } from '@/components/listings/Pagination';
-import { CATEGORY_LABELS, CONDITION_LABELS, SORT_LABELS } from '@/utils/constants';
-import type { ListingCategory, ListingCondition, ListingSort } from '@/types/listing';
+import { CONDITION_LABELS, SORT_LABELS } from '@/utils/constants';
+import type { ListingCondition, ListingSort } from '@/types/listing';
 
 const LIMIT = 12;
 
@@ -58,9 +59,10 @@ export function BrowseListingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useAppDispatch();
   const { items, total, pages, status } = useAppSelector((state) => state.listings.browse);
+  const { tree: categories } = useCategories();
 
   const q = searchParams.get('q') ?? '';
-  const category = (searchParams.get('category') ?? '') as ListingCategory | '';
+  const category = searchParams.get('category') ?? '';
   const condition = (searchParams.get('condition') ?? '') as ListingCondition | '';
   const sort = (searchParams.get('sort') ?? 'newest') as ListingSort;
   const minPrice = searchParams.get('minPrice') ?? '';
@@ -123,10 +125,16 @@ export function BrowseListingsPage() {
             className="rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-gray-700 dark:bg-gray-950 dark:text-white dark:focus:ring-brand-900/50"
           >
             <option value="">All categories</option>
-            {(Object.keys(CATEGORY_LABELS) as ListingCategory[]).map((value) => (
-              <option key={value} value={value}>
-                {CATEGORY_LABELS[value]}
-              </option>
+            {categories.map((top) => (
+              <Fragment key={top.slug}>
+                <option value={top.slug}>{top.name}</option>
+                {top.children.map((child) => (
+                  <option key={child.slug} value={child.slug}>
+                    {'\u00a0\u00a0\u2013 '}
+                    {child.name}
+                  </option>
+                ))}
+              </Fragment>
             ))}
           </select>
         </label>

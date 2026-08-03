@@ -32,7 +32,8 @@ structure that all milestones follow.
   real-time chat/notifications.
 - **Database**: MongoDB. One document collection per domain (Users, Listings,
   Categories, Chats, Messages, Favorites, Reports, Notifications).
-- **Media**: Cloudinary for image upload (listings, avatars). Added in M6.
+- **Media**: image upload (listings) via Cloudinary when configured, with a
+  local `/uploads` fallback for development/tests. Added in M6.
 
 ### Architectural principles
 
@@ -140,7 +141,7 @@ client/
 | Collection     | Purpose                                        | Added in |
 |----------------|------------------------------------------------|----------|
 | `users`        | Accounts, auth tokens, profile, role           | M3       |
-| `categories`   | Listing categories tree                        | M5       |
+| `categories`   | Listing categories tree                        | M6       |
 | `listings`     | Ads: title, description, price, images, meta   | M5       |
 | `chats`        | Conversations between buyer & seller           | M9       |
 | `messages`     | Individual chat messages + read receipts       | M9       |
@@ -169,10 +170,10 @@ client/
 |---|------------------------------------|--------|
 | 1 | Project planning & scaffolding     | ✅ done |
 | 2 | Backend foundation                 | ✅ done |
-| 3 | Backend auth (JWT, refresh)        | planned |
-| 4 | Frontend auth                      | planned |
-| 5 | Listings CRUD                      | planned |
-| 6 | Image upload (Cloudinary)          | planned |
+| 3 | Backend auth (JWT, refresh)        | ✅ done |
+| 4 | Frontend auth                      | ✅ done |
+| 5 | Listings CRUD                      | ✅ done |
+| 6 | Image upload (Cloudinary + fallback) & categories tree | ✅ done |
 | 7 | Search & filters                   | planned |
 | 8 | Favorites                          | planned |
 | 9 | Chat (Socket.io)                   | planned |

@@ -1,19 +1,11 @@
 import type { SafeUser } from '@/types/auth';
 
-export const LISTING_CATEGORIES = [
-  'vehicles',
-  'real-estate',
-  'electronics',
-  'furniture',
-  'jobs',
-  'fashion',
-] as const;
-
 export const LISTING_CONDITIONS = ['new', 'like_new', 'good', 'fair', 'poor'] as const;
 
 export const LISTING_SORTS = ['newest', 'price_asc', 'price_desc'] as const;
 
-export type ListingCategory = (typeof LISTING_CATEGORIES)[number];
+/** Category slug, e.g. `vehicles-cars`. Populated from the API category tree. */
+export type ListingCategory = string;
 export type ListingCondition = (typeof LISTING_CONDITIONS)[number];
 export type ListingSort = (typeof LISTING_SORTS)[number];
 export type ListingStatus = 'active' | 'sold' | 'removed';
@@ -26,6 +18,8 @@ export interface SafeListing {
   price: number;
   currency: string;
   category: ListingCategory;
+  /** Ancestor slug chain, self last (e.g. `['vehicles', 'vehicles-cars']`). */
+  categoryPath: string[];
   condition: ListingCondition;
   location: string | null;
   images: string[];

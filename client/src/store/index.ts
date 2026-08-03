@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import uiReducer from './slices/uiSlice';
 import authReducer from './slices/authSlice';
 import listingReducer from './slices/listingSlice';
+import categoryReducer from './slices/categorySlice';
 
 /**
  * Global Redux store.
@@ -12,6 +13,7 @@ export const store = configureStore({
     ui: uiReducer,
     auth: authReducer,
     listings: listingReducer,
+    categories: categoryReducer,
   },
   devTools: import.meta.env.DEV,
 });
