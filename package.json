@@ -1,0 +1,51 @@
+{
+  "name": "vedoras",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A production-grade OLX clone built with the MERN stack",
+  "type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,green \"npm:dev --workspace=server\" \"npm:dev --workspace=client\"",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:client": "npm run dev --workspace=client",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces",
+    "lint:fix": "npm run lint:fix --workspaces",
+    "format": "npm run format --workspaces",
+    "format:check": "npm run format:check --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "test": "npm run test --workspaces",
+    "start": "npm run start --workspace=server",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "server/**/*.{ts,js}": [
+      "eslint --fix --config server/eslint.config.js",
+      "prettier --write"
+    ],
+    "client/**/*.{ts,tsx,js,jsx}": [
+      "eslint --fix --config client/eslint.config.js",
+      "prettier --write"
+    ],
+    "server/**/*.{json,md}": [
+      "prettier --write"
+    ],
+    "client/**/*.{json,md,css,html}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
+    "concurrently": "^9.1.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3"
+  }
+}
