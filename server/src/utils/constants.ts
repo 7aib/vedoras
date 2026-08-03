@@ -13,4 +13,4 @@ export function apiPath(path: string): string {
 
 export const LISTING_CONDITIONS = ['new', 'like_new', 'good', 'fair', 'poor'] as const;
 
-export const LISTING_SORTS = ['newest', 'price_asc', 'price_desc'] as const;
+export const LISTING_SORTS = ['newest', 'price_asc', 'price_desc', 'relevance'] as const;

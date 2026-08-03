@@ -6,8 +6,14 @@ import type {
   UpdateListingInput,
 } from '../validators/listing.validator.js';
 import { ApiError } from '../utils/ApiError.js';
+import { LISTING_CONDITIONS } from '../utils/constants.js';
 import type { UserRole } from '../types/user.js';
-import type { ListingStatus, PaginatedListings, SafeListing } from '../types/listing.js';
+import type {
+  ListingFacets,
+  ListingStatus,
+  PaginatedListings,
+  SafeListing,
+} from '../types/listing.js';
 import { getCategoryPath } from './category.service.js';
 
 const SELLER_POPULATE = { path: 'seller', select: '-password -refreshTokens' };
@@ -80,7 +86,11 @@ export async function listListings({
   if (query.category) {
     filter.$or = [{ category: query.category }, { categoryPath: query.category }];
   }
-  if (query.condition) filter.condition = query.condition;
+
+  const conditions = parseConditions(query.condition);
+  if (conditions.length > 0) {
+    filter.condition = { $in: conditions };
+  }
 
   if (query.minPrice !== undefined || query.maxPrice !== undefined) {
     filter.price = {};
@@ -88,25 +98,38 @@ export async function listListings({
     if (query.maxPrice !== undefined) filter.price.$lte = query.maxPrice;
   }
 
-  if (query.q) {
-    const regex = new RegExp(query.q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-    filter.$or = [{ title: regex }, { description: regex }];
+  // Full-text search (M7): relevance-ranked via the text index on
+  // title/description. Combined with any of the filters above via AND.
+  const q = query.q;
+  const useText = q !== undefined && q !== '';
+  if (useText) {
+    filter.$text = { $search: q as string, $caseSensitive: false };
   }
 
-  const sort: Record<string, 1 | -1> =
+  const sort: Record<string, 1 | -1> | { score: { $meta: 'textScore' } } =
     query.sort === 'price_asc'
       ? { price: 1 }
       : query.sort === 'price_desc'
         ? { price: -1 }
-        : { createdAt: -1 };
+        : query.sort === 'relevance' && useText
+          ? { score: { $meta: 'textScore' } }
+          : { createdAt: -1 };
+
+  const projection = useText ? { score: { $meta: 'textScore' as const } } : {};
 
   const page = query.page;
   const limit = query.limit;
   const skip = (page - 1) * limit;
 
-  const [items, total] = await Promise.all([
-    Listing.find(filter).sort(sort).skip(skip).limit(limit).populate(SELLER_POPULATE).lean(),
+  const [items, total, facets] = await Promise.all([
+    Listing.find(filter, projection)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .populate(SELLER_POPULATE)
+      .lean(),
     Listing.countDocuments(filter),
+    buildFacets(filter),
   ]);
 
   return {
@@ -115,7 +138,101 @@ export async function listListings({
     limit,
     total,
     pages: Math.ceil(total / limit),
+    facets,
   };
+}
+
+/** Splits and validates the comma-separated condition filter. */
+function parseConditions(raw: string | undefined): string[] {
+  const conditions = (raw ?? '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+  const invalid = conditions.filter(
+    (condition) => !LISTING_CONDITIONS.includes(condition as (typeof LISTING_CONDITIONS)[number]),
+  );
+  if (invalid.length > 0) {
+    throw ApiError.badRequest(`Invalid condition(s): ${invalid.join(', ')}`);
+  }
+  return conditions;
+}
+
+interface FacetBucket {
+  _id: string;
+  count: number;
+}
+
+interface FacetPriceBucket {
+  min: number;
+  max: number;
+}
+
+interface FacetsAggregation {
+  categories: FacetBucket[];
+  conditions: FacetBucket[];
+  price: FacetPriceBucket[];
+}
+
+/**
+ * Computes facet counts for the *current* search/filters, ignoring the
+ * category/condition/price dimensions themselves so each facet reflects the
+ * rest of the query. Price bounds are global across matching listings.
+ */
+async function buildFacets(baseFilter: FilterQuery<ListingLean>): Promise<ListingFacets> {
+  const [result] = await Listing.aggregate<FacetsAggregation>([
+    { $match: baseFilter },
+    {
+      $facet: {
+        categories: [
+          { $group: { _id: '$category', count: { $sum: 1 } } },
+          { $sort: { count: -1 } },
+        ],
+        conditions: [
+          { $group: { _id: '$condition', count: { $sum: 1 } } },
+          { $sort: { count: -1 } },
+        ],
+        price: [{ $group: { _id: null, min: { $min: '$price' }, max: { $max: '$price' } } }],
+      },
+    },
+  ]);
+
+  const empty: FacetsAggregation = { categories: [], conditions: [], price: [] };
+  const facetsResult = result ?? empty;
+
+  return {
+    categories: facetsResult.categories.map((bucket) => ({
+      slug: bucket._id,
+      count: bucket.count,
+    })),
+    conditions: facetsResult.conditions.map((bucket) => ({
+      condition: bucket._id,
+      count: bucket.count,
+    })),
+    price: facetsResult.price[0]
+      ? { min: facetsResult.price[0].min, max: facetsResult.price[0].max }
+      : { min: null, max: null },
+  };
+}
+
+/** Returns recent active listings in the same top-level category. */
+export async function getRelatedListings(id: string, limit = 4): Promise<SafeListing[]> {
+  const listing = await Listing.findById(id).select('category categoryPath').lean();
+  if (!listing) {
+    throw ApiError.notFound('Listing not found');
+  }
+  const topCategory = (listing.categoryPath as string[] | undefined)?.[0] ?? listing.category;
+
+  const items = await Listing.find({
+    status: 'active',
+    _id: { $ne: id },
+    categoryPath: topCategory,
+  })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .populate(SELLER_POPULATE)
+    .lean();
+
+  return (items as unknown as ListingLean[]).map(toSafeListing);
 }
 
 export async function listMyListings(

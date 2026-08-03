@@ -5,6 +5,7 @@ import {
   createListing,
   deleteListing,
   getListingById,
+  getRelatedListings,
   listListings,
   listMyListings,
   updateListing,
@@ -26,6 +27,16 @@ export const getListingHandler = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const listing = await getListingById(req.params.id as string);
     ApiResponse.send(res, 200, 'Listing retrieved', listing);
+  },
+);
+
+export const getRelatedListingsHandler = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const listings = await getRelatedListings(
+      req.params.id as string,
+      Number(req.query.limit ?? 4),
+    );
+    ApiResponse.send(res, 200, 'Related listings retrieved', listings);
   },
 );
 

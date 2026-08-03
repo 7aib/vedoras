@@ -3,6 +3,7 @@ import {
   createListingHandler,
   deleteListingHandler,
   getListingHandler,
+  getRelatedListingsHandler,
   listListingsHandler,
   listMyListingsHandler,
   updateListingHandler,
@@ -13,6 +14,7 @@ import {
   createListingSchema,
   listListingsSchema,
   listingParamsSchema,
+  relatedListingsSchema,
   updateListingSchema,
 } from '../../validators/listing.validator.js';
 
@@ -26,6 +28,12 @@ router.get(
   listMyListingsHandler,
 );
 router.post('/listings', authenticate, validate(createListingSchema), createListingHandler);
+router.get(
+  '/listings/:id/related',
+  validate(listingParamsSchema, 'params'),
+  validate(relatedListingsSchema, 'query'),
+  getRelatedListingsHandler,
+);
 router.get('/listings/:id', validate(listingParamsSchema, 'params'), getListingHandler);
 router.patch(
   '/listings/:id',

@@ -30,6 +30,8 @@ const listingSchema = new Schema(
 
 listingSchema.index({ category: 1, status: 1, createdAt: -1 });
 listingSchema.index({ status: 1, createdAt: -1 });
+// Full-text index powering keyword search ($text). Included in M7.
+listingSchema.index({ title: 'text', description: 'text' });
 
 export type ListingDocument = InferSchemaType<typeof listingSchema>;
 
@@ -49,6 +51,8 @@ export interface ListingLean {
   seller: UserLean;
   createdAt: Date;
   updatedAt: Date;
+  /** Present only on text-search queries (via $meta: 'textScore'). */
+  score?: number;
 }
 
 /** Maps a listing document (lean, seller populated) to its public shape. */

@@ -45,11 +45,16 @@ export const listListingsSchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(12),
   q: z.string().trim().max(100).optional(),
   category: z.string().trim().min(1).max(60).optional(),
-  condition: z.enum(LISTING_CONDITIONS).optional(),
+  // Comma-separated list, e.g. `condition=new,good`.
+  condition: z.string().trim().optional(),
   minPrice: z.coerce.number().min(0).optional(),
   maxPrice: z.coerce.number().min(0).optional(),
   sort: z.enum(LISTING_SORTS).default('newest'),
   status: z.enum(['active', 'sold', 'removed']).optional(),
+});
+
+export const relatedListingsSchema = z.object({
+  limit: z.coerce.number().int().min(1).max(8).default(4),
 });
 
 export const listingParamsSchema = z.object({

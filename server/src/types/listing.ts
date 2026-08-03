@@ -25,10 +25,23 @@ export interface SafeListing {
   updatedAt: Date;
 }
 
+export interface ListingFacetCategory {
+  slug: string;
+  count: number;
+}
+
+export interface ListingFacets {
+  categories: ListingFacetCategory[];
+  conditions: { condition: string; count: number }[];
+  price: { min: number | null; max: number | null };
+}
+
 export interface PaginatedListings {
   items: SafeListing[];
   page: number;
   limit: number;
   total: number;
   pages: number;
+  /** Facet counts for the public browse endpoint (absent on "my listings"). */
+  facets?: ListingFacets;
 }

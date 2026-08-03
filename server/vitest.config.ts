@@ -17,6 +17,7 @@ export default defineConfig({
       JWT_ISSUER: 'vedoras-test',
       COOKIE_SAME_SITE: 'lax',
       AUTH_RATE_LIMIT_MAX: '500',
+      RATE_LIMIT_MAX: '500',
     },
   },
 });

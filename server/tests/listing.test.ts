@@ -221,6 +221,140 @@ describe('Listings API', () => {
     });
   });
 
+  describe('search, facets and related (M7)', () => {
+    async function seedListings(): Promise<{ token: string; id: string }> {
+      const { token } = await registerUser();
+      const listings = [
+        { ...baseListing, title: 'Gaming laptop RTX', price: 900, category: 'electronics' },
+        { ...baseListing, title: 'Office desk lamp', price: 10, category: 'furniture' },
+        {
+          ...baseListing,
+          title: 'Sofa bed',
+          price: 300,
+          category: 'furniture',
+          condition: 'fair',
+        },
+      ];
+      let id = '';
+      for (const listing of listings) {
+        const res = await request(app).post('/api/v1/listings').set(auth(token)).send(listing);
+        expect(res.status).toBe(201);
+        id = res.body.data._id as string;
+      }
+      return { token, id };
+    }
+
+    it('filters by multiple conditions at once (comma-separated)', async () => {
+      await seedListings();
+      const res = await request(app).get('/api/v1/listings?condition=good,fair');
+      expect(res.status).toBe(200);
+      expect(res.body.data.total).toBe(3);
+      const conditions = res.body.data.items.map((l: { condition: string }) => l.condition);
+      expect(conditions).toEqual(expect.arrayContaining(['good', 'fair']));
+    });
+
+    it('rejects an unknown condition value', async () => {
+      await seedListings();
+      const res = await request(app).get('/api/v1/listings?condition=pristine');
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+    });
+
+    it('returns facet counts that reflect the current query', async () => {
+      await seedListings();
+      const res = await request(app).get('/api/v1/listings?category=furniture');
+      expect(res.status).toBe(200);
+      const facets = res.body.data.facets;
+      expect(facets).toBeDefined();
+
+      const furnitureCount = facets.categories.find(
+        (c: { slug: string }) => c.slug === 'furniture',
+      );
+      expect(furnitureCount.count).toBe(2);
+      expect(facets.conditions).toEqual(
+        expect.arrayContaining([
+          { condition: 'good', count: 1 },
+          { condition: 'fair', count: 1 },
+        ]),
+      );
+      expect(facets.price).toEqual({ min: 10, max: 300 });
+    });
+
+    it('exposes empty facets when nothing matches', async () => {
+      const res = await request(app).get('/api/v1/listings?category=furniture');
+      expect(res.status).toBe(200);
+      expect(res.body.data.facets).toEqual({
+        categories: [],
+        conditions: [],
+        price: { min: null, max: null },
+      });
+    });
+
+    it('ranks text matches by relevance with sort=relevance', async () => {
+      await seedListings();
+      const res = await request(app).get('/api/v1/listings?q=laptop&sort=relevance');
+      expect(res.status).toBe(200);
+      expect(res.body.data.total).toBe(1);
+      expect(res.body.data.items[0].title).toBe('Gaming laptop RTX');
+    });
+
+    it('searches multiple terms as text and tolerates special characters', async () => {
+      await seedListings();
+      const twoTerms = await request(app).get('/api/v1/listings?q=desk+lamp');
+      expect(twoTerms.status).toBe(200);
+      expect(twoTerms.body.data.total).toBe(1);
+      expect(twoTerms.body.data.items[0].title).toBe('Office desk lamp');
+
+      const special = await request(app).get('/api/v1/listings?q=%5Bdesk*');
+      expect(special.status).toBe(200);
+      expect(special.body.data.total).toBe(1);
+    });
+
+    it('returns related listings from the same top-level category, excluding itself', async () => {
+      const { token, id } = await seedListings();
+      const extra = await request(app)
+        .post('/api/v1/listings')
+        .set(auth(token))
+        .send({ ...baseListing, title: 'Wooden bookshelf', price: 80, category: 'furniture' });
+      expect(extra.status).toBe(201);
+
+      const res = await request(app).get(`/api/v1/listings/${id}/related?limit=4`);
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body.data)).toBe(true);
+      const ids = res.body.data.map((l: { _id: string }) => l._id);
+      expect(ids).not.toContain(id);
+      expect(ids).toHaveLength(2);
+      const categories = res.body.data.map((l: { category: string }) => l.category);
+      expect(categories).toEqual(['furniture', 'furniture']);
+    });
+
+    it('returns an empty related list when nothing shares the category', async () => {
+      const { token } = await registerUser();
+      const created = await request(app)
+        .post('/api/v1/listings')
+        .set(auth(token))
+        .send({ ...baseListing, category: 'electronics' });
+      const res = await request(app).get(
+        `/api/v1/listings/${created.body.data._id}/related?limit=4`,
+      );
+      expect(res.status).toBe(200);
+      expect(res.body.data).toEqual([]);
+    });
+
+    it('returns 404 for related listings of an unknown listing', async () => {
+      const res = await request(app).get('/api/v1/listings/000000000000000000000000/related');
+      expect(res.status).toBe(404);
+    });
+
+    it('my listings do not include facet data', async () => {
+      const { token } = await registerUser();
+      await request(app).post('/api/v1/listings').set(auth(token)).send(baseListing);
+      const res = await request(app).get('/api/v1/listings/mine').set(auth(token));
+      expect(res.status).toBe(200);
+      expect(res.body.data.facets).toBeUndefined();
+    });
+  });
+
   describe('update', () => {
     it('lets the owner update their listing', async () => {
       const { token } = await registerUser();
