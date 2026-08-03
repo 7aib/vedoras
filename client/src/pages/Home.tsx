@@ -28,7 +28,7 @@ export function HomePage() {
         className="flex flex-col items-center gap-6 py-16 text-center sm:py-24"
       >
         <span className="rounded-full bg-brand-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-brand-700 dark:bg-brand-900 dark:text-brand-300">
-          Milestone 1 · Scaffolding
+          Milestone 4 · Accounts &amp; Authentication
         </span>
         <h1 className="font-display max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-6xl">
           Buy and sell anything

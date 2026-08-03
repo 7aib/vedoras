@@ -1,12 +1,33 @@
-import { Link, NavLink } from 'react-router';
+import { Link, NavLink, useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import { useDarkMode } from '@/hooks/useDarkMode';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/utils/cn';
 
 const navLinks = [{ to: '/', label: 'Browse' }];
 
+function initialsOf(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
+}
+
 export function Navbar() {
   const { isDark, toggle } = useDarkMode();
+  const { isAuthenticated, isInitializing, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch {
+      // Session is cleared locally regardless of the network result.
+    }
+    navigate('/');
+  };
 
   return (
     <motion.header
@@ -55,6 +76,47 @@ export function Navbar() {
               </li>
             ))}
           </ul>
+
+          {!isInitializing && (
+            <div className="flex items-center gap-2 sm:gap-3">
+              {isAuthenticated && user ? (
+                <>
+                  <span className="hidden text-sm font-medium text-gray-700 sm:block dark:text-gray-300">
+                    Hi, {user.firstName}
+                  </span>
+                  <Link
+                    to="/account"
+                    title="Your account"
+                    className="grid size-9 place-items-center rounded-full bg-brand-600 text-sm font-bold text-white transition-colors hover:bg-brand-700"
+                  >
+                    {initialsOf(`${user.firstName} ${user.lastName}`)}
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="hidden rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 sm:block dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+                  >
+                    Log out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+                  >
+                    Get started
+                  </Link>
+                </>
+              )}
+            </div>
+          )}
 
           <button
             type="button"
