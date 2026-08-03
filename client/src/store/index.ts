@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import uiReducer from './slices/uiSlice';
 import authReducer from './slices/authSlice';
+import listingReducer from './slices/listingSlice';
 
 /**
  * Global Redux store.
@@ -10,6 +11,7 @@ export const store = configureStore({
   reducer: {
     ui: uiReducer,
     auth: authReducer,
+    listings: listingReducer,
   },
   devTools: import.meta.env.DEV,
 });

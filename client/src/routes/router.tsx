@@ -7,6 +7,9 @@ import { NotFoundPage } from '@/pages/NotFound';
 import { LoginPage } from '@/pages/auth/Login';
 import { RegisterPage } from '@/pages/auth/Register';
 import { AccountPage } from '@/pages/Account';
+import { BrowseListingsPage } from '@/pages/listings/BrowseListings';
+import { ListingDetailPage } from '@/pages/listings/ListingDetail';
+import { ListingFormPage } from '@/pages/listings/ListingForm';
 
 export const router = createBrowserRouter([
   {
@@ -14,6 +17,8 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: 'listings', element: <BrowseListingsPage /> },
+      { path: 'listings/:id', element: <ListingDetailPage /> },
       {
         element: <GuestOnly />,
         children: [
@@ -28,7 +33,11 @@ export const router = createBrowserRouter([
       },
       {
         element: <RequireAuth />,
-        children: [{ path: 'account', element: <AccountPage /> }],
+        children: [
+          { path: 'account', element: <AccountPage /> },
+          { path: 'listings/new', element: <ListingFormPage mode="create" /> },
+          { path: 'listings/:id/edit', element: <ListingFormPage mode="edit" /> },
+        ],
       },
       { path: '*', element: <NotFoundPage /> },
     ],

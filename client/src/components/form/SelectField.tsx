@@ -1,0 +1,47 @@
+import { type Ref, type SelectHTMLAttributes } from 'react';
+import { cn } from '@/utils/cn';
+
+interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
+  label: string;
+  error?: string;
+  ref?: Ref<HTMLSelectElement>;
+}
+
+export function SelectField({
+  label,
+  error,
+  id,
+  className,
+  ref,
+  children,
+  ...rest
+}: SelectFieldProps) {
+  const inputId = id ?? rest.name;
+
+  return (
+    <div>
+      <label
+        htmlFor={inputId}
+        className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
+      >
+        {label}
+      </label>
+      <select
+        id={inputId}
+        ref={ref}
+        aria-invalid={error ? true : undefined}
+        className={cn(
+          'w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors focus:outline-none focus:ring-2 dark:bg-gray-950 dark:text-white',
+          error
+            ? 'border-red-400 focus:border-red-500 focus:ring-red-100 dark:border-red-500 dark:focus:ring-red-900/50'
+            : 'border-gray-300 focus:border-brand-500 focus:ring-brand-100 dark:border-gray-700 dark:focus:ring-brand-900/50',
+          className,
+        )}
+        {...rest}
+      >
+        {children}
+      </select>
+      {error ? <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{error}</p> : null}
+    </div>
+  );
+}

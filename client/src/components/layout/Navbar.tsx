@@ -4,7 +4,7 @@ import { useDarkMode } from '@/hooks/useDarkMode';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/utils/cn';
 
-const navLinks = [{ to: '/', label: 'Browse' }];
+const navLinks = [{ to: '/listings', label: 'Browse' }];
 
 function initialsOf(name: string): string {
   return name
@@ -84,6 +84,12 @@ export function Navbar() {
                   <span className="hidden text-sm font-medium text-gray-700 sm:block dark:text-gray-300">
                     Hi, {user.firstName}
                   </span>
+                  <Link
+                    to="/listings/new"
+                    className="hidden rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700 sm:block"
+                  >
+                    Post ad
+                  </Link>
                   <Link
                     to="/account"
                     title="Your account"

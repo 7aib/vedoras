@@ -1,6 +1,8 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
-
-const categories = ['Vehicles', 'Real Estate', 'Electronics', 'Furniture', 'Jobs', 'Fashion'];
+import { CATEGORY_LABELS } from '@/utils/constants';
+import type { ListingCategory } from '@/types/listing';
 
 const steps = [
   {
@@ -18,6 +20,14 @@ const steps = [
 ];
 
 export function HomePage() {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState('');
+
+  const search = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    navigate(query.trim() ? `/listings?q=${encodeURIComponent(query.trim())}` : '/listings');
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       {/* Hero */}
@@ -28,7 +38,7 @@ export function HomePage() {
         className="flex flex-col items-center gap-6 py-16 text-center sm:py-24"
       >
         <span className="rounded-full bg-brand-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-brand-700 dark:bg-brand-900 dark:text-brand-300">
-          Milestone 4 · Accounts &amp; Authentication
+          Milestone 5 · Listings
         </span>
         <h1 className="font-display max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-6xl">
           Buy and sell anything
@@ -57,18 +67,22 @@ export function HomePage() {
               d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
             />
           </svg>
-          <input
-            type="text"
-            placeholder="Search for cars, phones, apartments…"
-            className="w-full bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none dark:text-white"
-            aria-label="Search listings"
-          />
-          <button
-            type="button"
-            className="rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
-          >
-            Search
-          </button>
+          <form onSubmit={search} className="flex w-full items-center gap-2">
+            <input
+              type="text"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search for cars, phones, apartments…"
+              className="w-full bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none dark:text-white"
+              aria-label="Search listings"
+            />
+            <button
+              type="submit"
+              className="rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+            >
+              Search
+            </button>
+          </form>
         </div>
       </motion.section>
 
@@ -78,22 +92,25 @@ export function HomePage() {
           Browse categories
         </h2>
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          {categories.map((category, index) => (
-            <motion.button
+          {(Object.keys(CATEGORY_LABELS) as ListingCategory[]).map((category, index) => (
+            <motion.div
               key={category}
-              type="button"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover dark:border-gray-800 dark:bg-gray-900"
             >
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                {category}
-              </span>
-              <span className="mt-1 block text-xs text-gray-500 dark:text-gray-400">
-                0 listings
-              </span>
-            </motion.button>
+              <Link
+                to={`/listings?category=${category}`}
+                className="block rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover dark:border-gray-800 dark:bg-gray-900"
+              >
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                  {CATEGORY_LABELS[category]}
+                </span>
+                <span className="mt-1 block text-xs text-gray-500 dark:text-gray-400">
+                  Browse now
+                </span>
+              </Link>
+            </motion.div>
           ))}
         </div>
       </section>
