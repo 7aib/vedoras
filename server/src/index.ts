@@ -16,6 +16,15 @@ async function bootstrap(): Promise<void> {
     server = app.listen(env.PORT, () => {
       logger.info(`🚀 Server running on http://localhost:${env.PORT} (${env.NODE_ENV})`);
     });
+    // Surface startup failures (e.g. EADDRINUSE during dev restarts) instead
+    // of silently wedging the process with no listening socket.
+    server.on('error', (error) => {
+      logger.error('Failed to start HTTP server', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      process.exit(1);
+    });
   } catch (error) {
     logger.error('Bootstrap failed', {
       message: error instanceof Error ? error.message : String(error),
@@ -31,12 +40,18 @@ async function shutdown(signal: string, exitCode = 0): Promise<void> {
   logger.info(`${signal} received, shutting down gracefully...`);
 
   // Force exit if graceful shutdown stalls.
-  setTimeout(() => process.exit(exitCode), 10_000).unref();
+  const forceExit = setTimeout(() => {
+    logger.warn('Graceful shutdown timed out, forcing exit');
+    process.exit(exitCode);
+  }, 5_000);
 
   try {
     if (server) {
-      await new Promise<void>((resolve, reject) => {
-        server!.close((err) => (err ? reject(err) : resolve()));
+      // Drop idle keep-alive connections so close() completes promptly on
+      // rapid restarts instead of waiting for the keep-alive timeout.
+      server.closeIdleConnections();
+      await new Promise<void>((resolve) => {
+        server!.close(() => resolve());
       });
     }
     await disconnectDatabase();
@@ -44,6 +59,7 @@ async function shutdown(signal: string, exitCode = 0): Promise<void> {
   } catch (error) {
     logger.error('Error during shutdown', { error });
   } finally {
+    clearTimeout(forceExit);
     process.exit(exitCode);
   }
 }

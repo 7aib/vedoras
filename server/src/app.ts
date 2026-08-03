@@ -32,11 +32,13 @@ export function createApp(): Express {
   // --- Security headers ---
   app.use(helmet());
 
-  // --- CORS (allow-list from env) ---
+  // --- CORS ---
+  // In development the server reflects any local origin (Vite may pick a
+  // different port); in production it stays locked to the allow-list.
   const allowedOrigins = env.CLIENT_URL.split(',');
   app.use(
     cors({
-      origin: allowedOrigins,
+      origin: env.NODE_ENV === 'development' ? true : allowedOrigins,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],

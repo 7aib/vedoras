@@ -8,7 +8,10 @@ declare module 'axios' {
   }
 }
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api/v1';
+// Relative by default: in dev the Vite proxy forwards /api to the backend, so
+// requests stay same-origin and avoid CORS. Set VITE_API_URL to an absolute
+// URL when the API lives on another origin.
+const API_URL = import.meta.env.VITE_API_URL ?? '/api/v1';
 
 export const httpClient = axios.create({
   baseURL: API_URL,
