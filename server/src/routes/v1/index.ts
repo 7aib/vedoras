@@ -3,6 +3,8 @@ import { apiInfo } from '../../controllers/info.controller.js';
 import { healthCheck, liveness, readiness } from '../../controllers/health.controller.js';
 import authRoutes from './auth.routes.js';
 import listingRoutes from './listing.routes.js';
+import categoryRoutes from './category.routes.js';
+import uploadRoutes from './upload.routes.js';
 
 const router = Router();
 
@@ -17,5 +19,7 @@ router.get('/health/ready', readiness);
 // --- Domain routes ---
 router.use(authRoutes);
 router.use(listingRoutes);
+router.use(categoryRoutes);
+router.use(uploadRoutes);
 
 export default router;

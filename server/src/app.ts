@@ -12,6 +12,7 @@ import { notFoundHandler } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { requestId } from './middleware/requestId.js';
 import { createRateLimiter } from './middleware/rateLimiter.js';
+import { ensureUploadDir, uploadDir } from './middleware/upload.js';
 import { apiRoot } from './utils/constants.js';
 
 // Morgan token exposing the correlation id assigned by requestId middleware.
@@ -22,6 +23,9 @@ const httpLogFormat =
 
 export function createApp(): Express {
   const app = express();
+
+  // Local upload fallback directory.
+  ensureUploadDir();
 
   // Trust the first hop when running behind a reverse proxy (env-controlled).
   app.set('trust proxy', env.TRUST_PROXY);
@@ -52,6 +56,9 @@ export function createApp(): Express {
 
   // --- Compression ---
   app.use(compression());
+
+  // --- Static uploads (local fallback storage) ---
+  app.use('/uploads', express.static(uploadDir, { maxAge: '7d' }));
 
   // --- Structured HTTP logging ---
   if (env.NODE_ENV !== 'test') {

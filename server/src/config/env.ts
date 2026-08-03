@@ -16,6 +16,7 @@ const envSchema = z.object({
     .positive()
     .default(15 * 60 * 1000),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
+  AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(20),
   // --- Authentication ---
   JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET must be at least 32 characters'),
   JWT_REFRESH_SECRET: z.string().min(32, 'JWT_REFRESH_SECRET must be at least 32 characters'),
@@ -29,6 +30,16 @@ const envSchema = z.object({
     .default('30d'),
   JWT_ISSUER: z.string().default('vedoras'),
   COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),
+  // --- Media / uploads ---
+  UPLOAD_DIR: z.string().default('uploads'),
+  UPLOAD_MAX_FILES: z.coerce.number().int().min(1).max(10).default(10),
+  UPLOAD_MAX_SIZE_MB: z.coerce.number().int().min(1).max(50).default(5),
+  // Optional Cloudinary credentials. When unset, uploads fall back to local
+  // storage served from /uploads.
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
+  CLOUDINARY_UPLOAD_FOLDER: z.string().default('vedoras'),
 });
 
 const parsed = envSchema.safeParse(process.env);

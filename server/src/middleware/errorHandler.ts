@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 import mongoose from 'mongoose';
+import multer from 'multer';
 import logger from '../config/logger.js';
 import { ApiError } from '../utils/ApiError.js';
 
@@ -36,6 +37,12 @@ function errorPayload(error: unknown): ErrorPayload {
 
   if (error instanceof mongoose.Error.CastError) {
     return { statusCode: 400, message: 'Invalid identifier format', errors: [] };
+  }
+
+  if (error instanceof multer.MulterError) {
+    return error.code === 'LIMIT_FILE_SIZE'
+      ? { statusCode: 413, message: 'File too large', errors: [] }
+      : { statusCode: 400, message: `Upload error: ${error.code}`, errors: [] };
   }
 
   if (error instanceof SyntaxError && 'status' in error && error.status === 400) {

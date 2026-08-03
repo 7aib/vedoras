@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { seedCategories } from '../../src/services/category.service.js';
 
 /** Connects to the in-memory MongoDB started by global-setup. */
 export async function connectTestDb(): Promise<void> {
@@ -15,4 +16,5 @@ export async function disconnectTestDb(): Promise<void> {
 export async function clearDb(): Promise<void> {
   const collections = Object.values(mongoose.connection.collections);
   await Promise.all(collections.map((collection) => collection.deleteMany({})));
+  await seedCategories();
 }

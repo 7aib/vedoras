@@ -1,6 +1,6 @@
 import { Schema, model, type InferSchemaType } from 'mongoose';
 import type { SafeListing } from '../types/listing.js';
-import { LISTING_CATEGORIES, LISTING_CONDITIONS } from '../utils/constants.js';
+import { LISTING_CONDITIONS } from '../utils/constants.js';
 import { toSafeUser, type UserLean } from './user.model.js';
 
 const listingSchema = new Schema(
@@ -16,7 +16,8 @@ const listingSchema = new Schema(
       minlength: 3,
       maxlength: 3,
     },
-    category: { type: String, required: true, enum: LISTING_CATEGORIES },
+    category: { type: String, required: true, index: true },
+    categoryPath: { type: [String], required: true, default: [], index: true },
     condition: { type: String, enum: LISTING_CONDITIONS, default: 'good' },
     location: { type: String, default: null, trim: true, maxlength: 100 },
     images: { type: [String], default: [], maxlength: 10 },
@@ -39,6 +40,7 @@ export interface ListingLean {
   price: number;
   currency: string;
   category: string;
+  categoryPath: string[];
   condition: string;
   location: string | null;
   images: string[];
@@ -58,6 +60,7 @@ export function toSafeListing(listing: ListingLean): SafeListing {
     price: listing.price,
     currency: listing.currency,
     category: listing.category as SafeListing['category'],
+    categoryPath: listing.categoryPath,
     condition: listing.condition as SafeListing['condition'],
     location: listing.location ?? null,
     images: listing.images,

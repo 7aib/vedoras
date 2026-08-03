@@ -1,7 +1,8 @@
 import type { SafeUser } from './user.js';
-import type { LISTING_CATEGORIES, LISTING_CONDITIONS } from '../utils/constants.js';
+import type { LISTING_CONDITIONS } from '../utils/constants.js';
 
-export type ListingCategory = (typeof LISTING_CATEGORIES)[number];
+/** Category slug, e.g. `vehicles-cars`. Resolved against the seeded tree. */
+export type ListingCategory = string;
 export type ListingCondition = (typeof LISTING_CONDITIONS)[number];
 export type ListingStatus = 'active' | 'sold' | 'removed';
 
@@ -12,6 +13,8 @@ export interface SafeListing {
   price: number;
   currency: string;
   category: ListingCategory;
+  /** Ancestor slug chain, self last (e.g. `['vehicles', 'vehicles-cars']`). */
+  categoryPath: string[];
   condition: ListingCondition;
   location: string | null;
   images: string[];

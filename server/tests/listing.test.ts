@@ -153,6 +153,22 @@ describe('Listings API', () => {
       expect(res.body.data.items[0].title).toBe('Sofa bed');
     });
 
+    it('stores categoryPath and filters by parent category', async () => {
+      const { token } = await registerUser();
+      const created = await request(app)
+        .post('/api/v1/listings')
+        .set(auth(token))
+        .send({ ...baseListing, category: 'vehicles-cars' });
+      expect(created.status).toBe(201);
+      expect(created.body.data.categoryPath).toEqual(['vehicles', 'vehicles-cars']);
+
+      const byChild = await request(app).get('/api/v1/listings?category=vehicles-cars');
+      expect(byChild.body.data.total).toBe(1);
+
+      const byParent = await request(app).get('/api/v1/listings?category=vehicles');
+      expect(byParent.body.data.total).toBe(1);
+    });
+
     it('searches by keyword across title and description', async () => {
       await seedListings();
       const res = await request(app).get('/api/v1/listings?q=laptop');

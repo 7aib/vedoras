@@ -16,6 +16,7 @@ export default defineConfig({
       JWT_REFRESH_EXPIRES_IN: '30d',
       JWT_ISSUER: 'vedoras-test',
       COOKIE_SAME_SITE: 'lax',
+      AUTH_RATE_LIMIT_MAX: '500',
     },
   },
 });

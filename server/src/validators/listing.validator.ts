@@ -1,7 +1,15 @@
 import { z } from 'zod';
-import { LISTING_CATEGORIES, LISTING_CONDITIONS, LISTING_SORTS } from '../utils/constants.js';
+import { LISTING_CONDITIONS, LISTING_SORTS } from '../utils/constants.js';
 
 export const objectIdSchema = z.string().regex(/^[0-9a-f]{24}$/i, 'Invalid id');
+
+/** Accepts absolute http(s) URLs and local relative /uploads/ paths. */
+const imageUrlSchema = z
+  .string()
+  .refine(
+    (value) => /^https?:\/\//.test(value) || value.startsWith('/uploads/'),
+    'Images must be valid URLs or /uploads/ paths',
+  );
 
 export const createListingSchema = z.object({
   title: z
@@ -19,10 +27,15 @@ export const createListingSchema = z.object({
     .min(0, 'Price must be 0 or more')
     .max(1_000_000_000, 'Price is too large'),
   currency: z.string().trim().length(3, 'Currency must be a 3-letter code').default('USD'),
-  category: z.enum(LISTING_CATEGORIES),
+  category: z
+    .string()
+    .trim()
+    .min(1, 'Category is required')
+    .max(60, 'Category is too long')
+    .regex(/^[a-z0-9-]+$/, 'Invalid category'),
   condition: z.enum(LISTING_CONDITIONS).default('good'),
   location: z.string().trim().max(100, 'Max 100 characters').optional(),
-  images: z.array(z.string().url('Images must be valid URLs')).max(10, 'Max 10 images').optional(),
+  images: z.array(imageUrlSchema).max(10, 'Max 10 images').optional(),
 });
 
 export const updateListingSchema = createListingSchema.partial().strict();
@@ -31,7 +44,7 @@ export const listListingsSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(12),
   q: z.string().trim().max(100).optional(),
-  category: z.enum(LISTING_CATEGORIES).optional(),
+  category: z.string().trim().min(1).max(60).optional(),
   condition: z.enum(LISTING_CONDITIONS).optional(),
   minPrice: z.coerce.number().min(0).optional(),
   maxPrice: z.coerce.number().min(0).optional(),

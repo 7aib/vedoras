@@ -8,12 +8,21 @@ import type {
 import { ApiError } from '../utils/ApiError.js';
 import type { UserRole } from '../types/user.js';
 import type { ListingStatus, PaginatedListings, SafeListing } from '../types/listing.js';
+import { getCategoryPath } from './category.service.js';
 
 const SELLER_POPULATE = { path: 'seller', select: '-password -refreshTokens' };
 
 export interface ListListingsParams {
   query: ListListingsQuery;
   status?: ListingStatus;
+}
+
+async function resolveCategory(category: string): Promise<string[]> {
+  const path = await getCategoryPath(category);
+  if (!path) {
+    throw ApiError.badRequest(`Unknown category: ${category}`);
+  }
+  return path;
 }
 
 function sellerIdOf(seller: unknown): string {
@@ -38,7 +47,8 @@ export async function createListing(
   input: CreateListingInput,
   userId: string,
 ): Promise<SafeListing> {
-  const listing = await Listing.create({ ...input, seller: userId });
+  const categoryPath = await resolveCategory(input.category);
+  const listing = await Listing.create({ ...input, categoryPath, seller: userId });
   return populateSafe(listing.toObject() as unknown as ListingLean);
 }
 
@@ -67,7 +77,9 @@ export async function listListings({
     filter.status = 'active';
   }
 
-  if (query.category) filter.category = query.category;
+  if (query.category) {
+    filter.$or = [{ category: query.category }, { categoryPath: query.category }];
+  }
   if (query.condition) filter.condition = query.condition;
 
   if (query.minPrice !== undefined || query.maxPrice !== undefined) {
@@ -148,7 +160,15 @@ export async function updateListing(
   }
   assertOwnerOrAdmin(listing, userId, role);
 
-  const updated = await Listing.findByIdAndUpdate(id, input, { new: true, runValidators: true })
+  const updates: UpdateListingInput & { categoryPath?: string[] } = { ...input };
+  if (input.category) {
+    updates.categoryPath = await resolveCategory(input.category);
+  }
+
+  const updated = await Listing.findByIdAndUpdate(id, updates, {
+    new: true,
+    runValidators: true,
+  })
     .populate(SELLER_POPULATE)
     .lean();
   if (!updated) {

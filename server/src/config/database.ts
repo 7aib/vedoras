@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import logger from './logger.js';
 import { env } from './env.js';
+import { seedCategories } from '../services/category.service.js';
 
 mongoose.set('strictQuery', true);
 
@@ -21,6 +22,9 @@ export async function connectDatabase(): Promise<void> {
     await mongoose.connect(env.MONGODB_URI, {
       serverSelectionTimeoutMS: 10_000,
     });
+
+    // Ensure the base category tree exists (idempotent).
+    await seedCategories();
   } catch (error) {
     logger.error('Failed to connect to MongoDB', { error });
     throw error;

@@ -22,8 +22,8 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Server uploads
-server/src/uploads/*
-!server/src/uploads/.gitkeep
+server/uploads/*
+!server/uploads/.gitkeep
 
 # MongoDB local data
 data/
