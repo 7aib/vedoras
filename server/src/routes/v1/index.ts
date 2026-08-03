@@ -5,6 +5,7 @@ import authRoutes from './auth.routes.js';
 import listingRoutes from './listing.routes.js';
 import categoryRoutes from './category.routes.js';
 import uploadRoutes from './upload.routes.js';
+import favoriteRoutes from './favorite.routes.js';
 
 const router = Router();
 
@@ -21,5 +22,6 @@ router.use(authRoutes);
 router.use(listingRoutes);
 router.use(categoryRoutes);
 router.use(uploadRoutes);
+router.use(favoriteRoutes);
 
 export default router;

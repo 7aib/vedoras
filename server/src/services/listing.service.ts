@@ -15,12 +15,15 @@ import type {
   SafeListing,
 } from '../types/listing.js';
 import { getCategoryPath } from './category.service.js';
+import { enrichListings } from './favorite.service.js';
 
 const SELLER_POPULATE = { path: 'seller', select: '-password -refreshTokens' };
 
 export interface ListListingsParams {
   query: ListListingsQuery;
   status?: ListingStatus;
+  /** When present, sets `isFavorited` on returned listings (M8). */
+  userId?: string;
 }
 
 async function resolveCategory(category: string): Promise<string[]> {
@@ -49,6 +52,11 @@ async function populateSafe(listing: ListingLean): Promise<SafeListing> {
   return toSafeListing(populated as unknown as ListingLean);
 }
 
+async function enrichSingle(listing: ListingLean, userId?: string): Promise<SafeListing> {
+  const [safe] = await enrichListings([toSafeListing(listing)], userId);
+  return safe!;
+}
+
 export async function createListing(
   input: CreateListingInput,
   userId: string,
@@ -58,7 +66,7 @@ export async function createListing(
   return populateSafe(listing.toObject() as unknown as ListingLean);
 }
 
-export async function getListingById(id: string): Promise<SafeListing> {
+export async function getListingById(id: string, userId?: string): Promise<SafeListing> {
   const listing = await Listing.findByIdAndUpdate(id, { $inc: { views: 1 } }, { new: true })
     .populate(SELLER_POPULATE)
     .lean();
@@ -66,12 +74,13 @@ export async function getListingById(id: string): Promise<SafeListing> {
   if (!listing) {
     throw ApiError.notFound('Listing not found');
   }
-  return toSafeListing(listing as unknown as ListingLean);
+  return enrichSingle(listing as unknown as ListingLean, userId);
 }
 
 export async function listListings({
   query,
   status,
+  userId,
 }: ListListingsParams): Promise<PaginatedListings> {
   const filter: FilterQuery<ListingLean> = {};
 
@@ -132,8 +141,13 @@ export async function listListings({
     buildFacets(filter),
   ]);
 
+  const enrichedItems = await enrichListings(
+    (items as unknown as ListingLean[]).map(toSafeListing),
+    userId,
+  );
+
   return {
-    items: (items as unknown as ListingLean[]).map(toSafeListing),
+    items: enrichedItems,
     page,
     limit,
     total,
@@ -215,7 +229,11 @@ async function buildFacets(baseFilter: FilterQuery<ListingLean>): Promise<Listin
 }
 
 /** Returns recent active listings in the same top-level category. */
-export async function getRelatedListings(id: string, limit = 4): Promise<SafeListing[]> {
+export async function getRelatedListings(
+  id: string,
+  limit = 4,
+  userId?: string,
+): Promise<SafeListing[]> {
   const listing = await Listing.findById(id).select('category categoryPath').lean();
   if (!listing) {
     throw ApiError.notFound('Listing not found');
@@ -232,7 +250,7 @@ export async function getRelatedListings(id: string, limit = 4): Promise<SafeLis
     .populate(SELLER_POPULATE)
     .lean();
 
-  return (items as unknown as ListingLean[]).map(toSafeListing);
+  return enrichListings((items as unknown as ListingLean[]).map(toSafeListing), userId);
 }
 
 export async function listMyListings(
@@ -257,7 +275,7 @@ export async function listMyListings(
   ]);
 
   return {
-    items: (items as unknown as ListingLean[]).map(toSafeListing),
+    items: await enrichListings((items as unknown as ListingLean[]).map(toSafeListing), userId),
     page,
     limit,
     total,
@@ -291,7 +309,7 @@ export async function updateListing(
   if (!updated) {
     throw ApiError.notFound('Listing not found');
   }
-  return toSafeListing(updated as unknown as ListingLean);
+  return enrichSingle(updated as unknown as ListingLean, userId);
 }
 
 export async function deleteListing(id: string, userId: string, role: UserRole): Promise<void> {

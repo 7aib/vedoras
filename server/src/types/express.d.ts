@@ -5,10 +5,10 @@ declare global {
     interface Request {
       /** Correlation id assigned by the requestId middleware. */
       id: string;
-      /** Authenticated user id (set by the authenticate middleware). */
-      userId: string;
-      /** Authenticated user document (set by the authenticate middleware). */
-      user: SafeUser;
+      /** Authenticated user id (set by authenticate / optionalAuthenticate). */
+      userId?: string;
+      /** Authenticated user document (set by authenticate / optionalAuthenticate). */
+      user?: SafeUser;
     }
   }
 }

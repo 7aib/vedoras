@@ -10,6 +10,7 @@ import {
 } from '../../controllers/listing.controller.js';
 import { validate } from '../../middleware/validate.js';
 import { authenticate } from '../../middleware/authenticate.js';
+import { optionalAuthenticate } from '../../middleware/optionalAuthenticate.js';
 import {
   createListingSchema,
   listListingsSchema,
@@ -20,7 +21,12 @@ import {
 
 const router = Router();
 
-router.get('/listings', validate(listListingsSchema, 'query'), listListingsHandler);
+router.get(
+  '/listings',
+  optionalAuthenticate,
+  validate(listListingsSchema, 'query'),
+  listListingsHandler,
+);
 router.get(
   '/listings/mine',
   authenticate,
@@ -30,11 +36,17 @@ router.get(
 router.post('/listings', authenticate, validate(createListingSchema), createListingHandler);
 router.get(
   '/listings/:id/related',
+  optionalAuthenticate,
   validate(listingParamsSchema, 'params'),
   validate(relatedListingsSchema, 'query'),
   getRelatedListingsHandler,
 );
-router.get('/listings/:id', validate(listingParamsSchema, 'params'), getListingHandler);
+router.get(
+  '/listings/:id',
+  optionalAuthenticate,
+  validate(listingParamsSchema, 'params'),
+  getListingHandler,
+);
 router.patch(
   '/listings/:id',
   authenticate,

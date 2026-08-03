@@ -73,6 +73,7 @@ export function toSafeListing(listing: ListingLean): SafeListing {
     seller: toSafeUser(listing.seller),
     createdAt: listing.createdAt,
     updatedAt: listing.updatedAt,
+    favoriteCount: 0,
   };
 }
 

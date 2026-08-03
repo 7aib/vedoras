@@ -18,14 +18,14 @@ import type {
 
 export const createListingHandler = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const listing = await createListing(req.body as CreateListingInput, req.userId);
+    const listing = await createListing(req.body as CreateListingInput, req.userId!);
     ApiResponse.send(res, 201, 'Listing created', listing);
   },
 );
 
 export const getListingHandler = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const listing = await getListingById(req.params.id as string);
+    const listing = await getListingById(req.params.id as string, req.userId);
     ApiResponse.send(res, 200, 'Listing retrieved', listing);
   },
 );
@@ -35,6 +35,7 @@ export const getRelatedListingsHandler = asyncHandler(
     const listings = await getRelatedListings(
       req.params.id as string,
       Number(req.query.limit ?? 4),
+      req.userId,
     );
     ApiResponse.send(res, 200, 'Related listings retrieved', listings);
   },
@@ -42,14 +43,17 @@ export const getRelatedListingsHandler = asyncHandler(
 
 export const listListingsHandler = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const result = await listListings({ query: req.query as unknown as ListListingsQuery });
+    const result = await listListings({
+      query: req.query as unknown as ListListingsQuery,
+      userId: req.userId,
+    });
     ApiResponse.send(res, 200, 'Listings retrieved', result);
   },
 );
 
 export const listMyListingsHandler = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const result = await listMyListings(req.userId, req.query as unknown as ListListingsQuery);
+    const result = await listMyListings(req.userId!, req.query as unknown as ListListingsQuery);
     ApiResponse.send(res, 200, 'My listings retrieved', result);
   },
 );
@@ -58,8 +62,8 @@ export const updateListingHandler = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const listing = await updateListing(
       req.params.id as string,
-      req.userId,
-      req.user.role,
+      req.userId!,
+      req.user!.role,
       req.body as UpdateListingInput,
     );
     ApiResponse.send(res, 200, 'Listing updated', listing);
@@ -68,7 +72,7 @@ export const updateListingHandler = asyncHandler(
 
 export const deleteListingHandler = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    await deleteListing(req.params.id as string, req.userId, req.user.role);
+    await deleteListing(req.params.id as string, req.userId!, req.user!.role);
     ApiResponse.send(res, 200, 'Listing deleted', null);
   },
 );
