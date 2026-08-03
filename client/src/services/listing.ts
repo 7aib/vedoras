@@ -39,3 +39,10 @@ export async function updateListing(id: string, input: UpdateListingInput): Prom
 export async function deleteListing(id: string): Promise<void> {
   await httpClient.delete<null>(`/listings/${id}`);
 }
+
+export async function fetchRelatedListings(id: string, limit = 4): Promise<SafeListing[]> {
+  const res = await httpClient.get<SafeListing[]>(`/listings/${id}/related`, {
+    params: { limit },
+  });
+  return res.data;
+}

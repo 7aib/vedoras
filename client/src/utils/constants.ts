@@ -17,6 +17,7 @@ export const SORT_LABELS: Record<ListingSort, string> = {
   newest: 'Newest first',
   price_asc: 'Price: low to high',
   price_desc: 'Price: high to low',
+  relevance: 'Most relevant',
 };
 
 /** Formats a price with its currency code, e.g. `$150.00` / `150 USD`. */

@@ -2,7 +2,7 @@ import type { SafeUser } from '@/types/auth';
 
 export const LISTING_CONDITIONS = ['new', 'like_new', 'good', 'fair', 'poor'] as const;
 
-export const LISTING_SORTS = ['newest', 'price_asc', 'price_desc'] as const;
+export const LISTING_SORTS = ['newest', 'price_asc', 'price_desc', 'relevance'] as const;
 
 /** Category slug, e.g. `vehicles-cars`. Populated from the API category tree. */
 export type ListingCategory = string;
@@ -30,12 +30,19 @@ export interface SafeListing {
   updatedAt: string;
 }
 
+export interface ListingFacets {
+  categories: { slug: string; count: number }[];
+  conditions: { condition: string; count: number }[];
+  price: { min: number | null; max: number | null };
+}
+
 export interface PaginatedListings {
   items: SafeListing[];
   page: number;
   limit: number;
   total: number;
   pages: number;
+  facets?: ListingFacets;
 }
 
 export interface CreateListingInput {
@@ -56,7 +63,8 @@ export interface ListListingsQuery {
   limit?: number;
   q?: string;
   category?: ListingCategory;
-  condition?: ListingCondition;
+  /** Comma-separated list, e.g. `new,good`. */
+  condition?: string;
   minPrice?: number;
   maxPrice?: number;
   sort?: ListingSort;

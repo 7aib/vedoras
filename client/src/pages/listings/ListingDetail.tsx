@@ -2,10 +2,16 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import toast from 'react-hot-toast';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { clearDetail, deleteListing, fetchListingDetail } from '@/store/slices/listingSlice';
+import {
+  clearDetail,
+  deleteListing,
+  fetchListingDetail,
+  fetchRelatedListings,
+} from '@/store/slices/listingSlice';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { PageLoader } from '@/components/auth/PageLoader';
+import { ListingCard } from '@/components/listings/ListingCard';
 import { CONDITION_LABELS, formatPrice } from '@/utils/constants';
 
 function initialsOf(name: string): string {
@@ -75,10 +81,12 @@ export function ListingDetailPage() {
   const { user } = useAuth();
   const { categoryName } = useCategories();
   const { listing, status } = useAppSelector((state) => state.listings.detail);
+  const related = useAppSelector((state) => state.listings.related);
 
   useEffect(() => {
     if (id) {
       dispatch(fetchListingDetail(id));
+      dispatch(fetchRelatedListings({ id }));
     }
     return () => {
       dispatch(clearDetail());
@@ -220,6 +228,19 @@ export function ListingDetailPage() {
           {listing.description}
         </p>
       </div>
+
+      {related.items.length > 0 && (
+        <div className="mt-12">
+          <h2 className="font-display text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+            Similar listings
+          </h2>
+          <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {related.items.map((item) => (
+              <ListingCard key={item._id} listing={item} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import {
   createListing as apiCreateListing,
   deleteListing as apiDeleteListing,
   fetchListing,
+  fetchRelatedListings as apiFetchRelatedListings,
   listListings,
   listMyListings,
   updateListing as apiUpdateListing,
@@ -24,6 +25,7 @@ interface ListingCollection extends PaginatedListings {
 interface ListingState {
   browse: ListingCollection;
   detail: { listing: SafeListing | null; status: RequestStatus };
+  related: { items: SafeListing[]; status: RequestStatus };
   mine: ListingCollection;
 }
 
@@ -39,6 +41,7 @@ const emptyCollection: ListingCollection = {
 const initialState: ListingState = {
   browse: emptyCollection,
   detail: { listing: null, status: 'idle' },
+  related: { items: [], status: 'idle' },
   mine: emptyCollection,
 };
 
@@ -53,6 +56,11 @@ export const fetchBrowseListings = createAsyncThunk(
 
 export const fetchListingDetail = createAsyncThunk('listings/detail', async (id: string) =>
   fetchListing(id),
+);
+
+export const fetchRelatedListings = createAsyncThunk(
+  'listings/related',
+  async ({ id, limit = 4 }: { id: string; limit?: number }) => apiFetchRelatedListings(id, limit),
 );
 
 export const fetchMyListings = createAsyncThunk('listings/mine', async (query: ListListingsQuery) =>
@@ -96,6 +104,7 @@ const listingSlice = createSlice({
       })
       .addCase(fetchListingDetail.pending, (state) => {
         state.detail.status = 'loading';
+        state.related = { items: [], status: 'idle' };
       })
       .addCase(fetchListingDetail.fulfilled, (state, action: PayloadAction<SafeListing>) => {
         state.detail.listing = action.payload;
@@ -103,6 +112,16 @@ const listingSlice = createSlice({
       })
       .addCase(fetchListingDetail.rejected, (state) => {
         state.detail.status = 'failed';
+      })
+      .addCase(fetchRelatedListings.pending, (state) => {
+        state.related.status = 'loading';
+      })
+      .addCase(fetchRelatedListings.fulfilled, (state, action: PayloadAction<SafeListing[]>) => {
+        state.related.items = action.payload;
+        state.related.status = 'succeeded';
+      })
+      .addCase(fetchRelatedListings.rejected, (state) => {
+        state.related.status = 'failed';
       })
       .addCase(fetchMyListings.pending, (state) => {
         state.mine.status = 'loading';

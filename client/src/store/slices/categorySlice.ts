@@ -1,4 +1,9 @@
-import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import {
+  createAsyncThunk,
+  createSelector,
+  createSlice,
+  type PayloadAction,
+} from '@reduxjs/toolkit';
 import { fetchCategories as apiFetchCategories } from '@/services/category';
 import type { SafeCategory } from '@/types/category';
 import type { RootState } from '@/store';
@@ -39,14 +44,17 @@ const categorySlice = createSlice({
 export default categorySlice.reducer;
 
 /** Selects a { slug: name } lookup map from the loaded category tree. */
-export function selectCategoryMap(state: RootState): Record<string, string> {
-  const map: Record<string, string> = {};
-  const walk = (nodes: SafeCategory[]): void => {
-    for (const node of nodes) {
-      map[node.slug] = node.name;
-      if (node.children.length > 0) walk(node.children);
-    }
-  };
-  walk(state.categories.tree);
-  return map;
-}
+export const selectCategoryMap = createSelector(
+  [(state: RootState) => state.categories.tree],
+  (tree) => {
+    const map: Record<string, string> = {};
+    const walk = (nodes: SafeCategory[]): void => {
+      for (const node of nodes) {
+        map[node.slug] = node.name;
+        if (node.children.length > 0) walk(node.children);
+      }
+    };
+    walk(tree);
+    return map;
+  },
+);

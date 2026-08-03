@@ -174,7 +174,7 @@ client/
 | 4 | Frontend auth                      | ✅ done |
 | 5 | Listings CRUD                      | ✅ done |
 | 6 | Image upload (Cloudinary + fallback) & categories tree | ✅ done |
-| 7 | Search & filters                   | planned |
+| 7 | Search & filters (full-text search, faceted filters, related listings) | ✅ done |
 | 8 | Favorites                          | planned |
 | 9 | Chat (Socket.io)                   | planned |
 | 10| Notifications                      | planned |
