@@ -178,7 +178,7 @@ client/
 | 8 | Favorites                          | ✅ done |
 | 9 | Chat (Socket.io)                   | ✅ done |
 | 10| Notifications                      | ✅ done |
-| 11| Admin dashboard                    | in progress |
+| 11| Admin dashboard                    | done |
 | 12| Performance optimization           | planned |
 | - | Final: E2E, docs, production       | planned |
 
