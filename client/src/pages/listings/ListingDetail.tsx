@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { PageLoader } from '@/components/auth/PageLoader';
 import { ListingCard } from '@/components/listings/ListingCard';
+import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { CONDITION_LABELS, formatPrice } from '@/utils/constants';
 
 function initialsOf(name: string): string {
@@ -171,6 +172,13 @@ export function ListingDetailPage() {
                   {listing.seller.firstName} {listing.seller.lastName}
                 </p>
               </div>
+              <FavoriteButton
+                listingId={listing._id}
+                isFavorited={listing.isFavorited}
+                favoriteCount={listing.favoriteCount}
+                showCount
+                className="rounded-xl border border-gray-200 px-4 py-2.5 shadow-sm transition-colors hover:border-rose-200 hover:bg-rose-50 dark:border-gray-700 dark:hover:border-rose-900 dark:hover:bg-rose-950"
+              />
             </div>
 
             <p className="font-display mt-4 text-3xl font-bold tracking-tight text-brand-600 dark:text-brand-400">

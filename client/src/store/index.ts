@@ -3,6 +3,7 @@ import uiReducer from './slices/uiSlice';
 import authReducer from './slices/authSlice';
 import listingReducer from './slices/listingSlice';
 import categoryReducer from './slices/categorySlice';
+import favoriteReducer from './slices/favoriteSlice';
 
 /**
  * Global Redux store.
@@ -14,6 +15,7 @@ export const store = configureStore({
     auth: authReducer,
     listings: listingReducer,
     categories: categoryReducer,
+    favorites: favoriteReducer,
   },
   devTools: import.meta.env.DEV,
 });

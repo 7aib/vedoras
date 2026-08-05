@@ -175,7 +175,7 @@ client/
 | 5 | Listings CRUD                      | ✅ done |
 | 6 | Image upload (Cloudinary + fallback) & categories tree | ✅ done |
 | 7 | Search & filters (full-text search, faceted filters, related listings) | ✅ done |
-| 8 | Favorites                          | in progress (server done) |
+| 8 | Favorites                          | ✅ done |
 | 9 | Chat (Socket.io)                   | planned |
 | 10| Notifications                      | planned |
 | 11| Admin dashboard                    | planned |

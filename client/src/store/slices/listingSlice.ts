@@ -8,8 +8,10 @@ import {
   listMyListings,
   updateListing as apiUpdateListing,
 } from '@/services/listing';
+import { toggleFavorite } from './favoriteSlice';
 import type {
   CreateListingInput,
+  FavoriteToggleResult,
   ListListingsQuery,
   PaginatedListings,
   SafeListing,
@@ -154,6 +156,17 @@ const listingSlice = createSlice({
         if (state.detail.listing?._id === id) {
           state.detail.listing = null;
           state.detail.status = 'idle';
+        }
+      })
+      .addCase(toggleFavorite.fulfilled, (state, action: PayloadAction<FavoriteToggleResult>) => {
+        const { listingId, isFavorited, favoriteCount } = action.payload;
+        const patch = (item: SafeListing): SafeListing =>
+          item._id === listingId ? { ...item, isFavorited, favoriteCount } : item;
+        state.browse.items = state.browse.items.map(patch);
+        state.mine.items = state.mine.items.map(patch);
+        state.related.items = state.related.items.map(patch);
+        if (state.detail.listing?._id === listingId) {
+          state.detail.listing = { ...state.detail.listing, isFavorited, favoriteCount };
         }
       });
   },

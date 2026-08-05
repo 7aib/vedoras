@@ -28,6 +28,16 @@ export interface SafeListing {
   seller: SafeUser;
   createdAt: string;
   updatedAt: string;
+  /** Number of users who favorited this listing. */
+  favoriteCount: number;
+  /** Whether the signed-in user favorited it; only present when authenticated. */
+  isFavorited?: boolean;
+}
+
+export interface FavoriteToggleResult {
+  listingId: string;
+  isFavorited: boolean;
+  favoriteCount: number;
 }
 
 export interface ListingFacets {

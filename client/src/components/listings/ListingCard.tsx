@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import { useAppSelector } from '@/store/hooks';
 import { selectCategoryMap } from '@/store/slices/categorySlice';
+import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { humanizeSlug, CONDITION_LABELS, formatPrice } from '@/utils/constants';
 import type { SafeListing } from '@/types/listing';
 
@@ -45,6 +46,13 @@ export function ListingCard({ listing }: { listing: SafeListing }) {
             {listing.status}
           </span>
         )}
+        <FavoriteButton
+          listingId={listing._id}
+          isFavorited={listing.isFavorited}
+          favoriteCount={listing.favoriteCount}
+          showCount
+          className="absolute right-3 top-3 rounded-full bg-white/90 p-2 shadow-sm backdrop-blur dark:bg-gray-900/90"
+        />
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
