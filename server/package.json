@@ -30,6 +30,7 @@
     "mongoose": "^8.9.5",
     "morgan": "^1.10.0",
     "multer": "^2.2.0",
+    "socket.io": "^4.8.3",
     "winston": "^3.17.0",
     "zod": "^3.24.1"
   },
@@ -49,6 +50,7 @@
     "globals": "^15.14.0",
     "mongodb-memory-server": "^11.2.0",
     "prettier": "^3.4.2",
+    "socket.io-client": "^4.8.3",
     "supertest": "^7.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",

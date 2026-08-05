@@ -3,6 +3,7 @@ import { createApp } from './app.js';
 import { connectDatabase, disconnectDatabase } from './config/database.js';
 import { env } from './config/env.js';
 import logger from './config/logger.js';
+import { closeSocket, getSocketServer, initSocket } from './socket/index.js';
 
 type ServerHandle = ReturnType<ReturnType<typeof createApp>['listen']>;
 
@@ -16,6 +17,7 @@ async function bootstrap(): Promise<void> {
     server = app.listen(env.PORT, () => {
       logger.info(`🚀 Server running on http://localhost:${env.PORT} (${env.NODE_ENV})`);
     });
+    initSocket(server);
     // Surface startup failures (e.g. EADDRINUSE during dev restarts) instead
     // of silently wedging the process with no listening socket.
     server.on('error', (error) => {
@@ -46,7 +48,10 @@ async function shutdown(signal: string, exitCode = 0): Promise<void> {
   }, 5_000);
 
   try {
-    if (server) {
+    // The socket server wraps the HTTP server; closing it drains both.
+    if (getSocketServer()) {
+      await closeSocket();
+    } else if (server) {
       // Drop idle keep-alive connections so close() completes promptly on
       // rapid restarts instead of waiting for the keep-alive timeout.
       server.closeIdleConnections();

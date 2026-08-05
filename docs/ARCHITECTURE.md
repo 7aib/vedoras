@@ -176,7 +176,7 @@ client/
 | 6 | Image upload (Cloudinary + fallback) & categories tree | ✅ done |
 | 7 | Search & filters (full-text search, faceted filters, related listings) | ✅ done |
 | 8 | Favorites                          | ✅ done |
-| 9 | Chat (Socket.io)                   | planned |
+| 9 | Chat (Socket.io)                   | in progress |
 | 10| Notifications                      | planned |
 | 11| Admin dashboard                    | planned |
 | 12| Performance optimization           | planned |

@@ -6,6 +6,7 @@ import listingRoutes from './listing.routes.js';
 import categoryRoutes from './category.routes.js';
 import uploadRoutes from './upload.routes.js';
 import favoriteRoutes from './favorite.routes.js';
+import chatRoutes from './chat.routes.js';
 
 const router = Router();
 
@@ -23,5 +24,6 @@ router.use(listingRoutes);
 router.use(categoryRoutes);
 router.use(uploadRoutes);
 router.use(favoriteRoutes);
+router.use(chatRoutes);
 
 export default router;
