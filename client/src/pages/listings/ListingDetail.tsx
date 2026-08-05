@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import toast from 'react-hot-toast';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
@@ -8,6 +8,7 @@ import {
   fetchListingDetail,
   fetchRelatedListings,
 } from '@/store/slices/listingSlice';
+import { createConversation } from '@/store/slices/chatSlice';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { PageLoader } from '@/components/auth/PageLoader';
@@ -79,6 +80,7 @@ export function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { categoryName } = useCategories();
   const { listing, status } = useAppSelector((state) => state.listings.detail);
@@ -103,6 +105,22 @@ export function ListingDetailPage() {
       navigate('/account');
     } catch {
       toast.error('Unable to delete the listing. Please try again.');
+    }
+  };
+
+  const handleMessageSeller = async () => {
+    if (!listing) return;
+    if (!user) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+    try {
+      const conversation = await dispatch(
+        createConversation({ participantId: listing.seller._id, listingId: listing._id }),
+      ).unwrap();
+      navigate(`/chat/${conversation._id}`);
+    } catch {
+      toast.error('Unable to start a conversation. Please try again.');
     }
   };
 
@@ -226,6 +244,15 @@ export function ListingDetailPage() {
                 <p className="text-sm text-gray-500 dark:text-gray-400">{listing.seller.email}</p>
               </div>
             </div>
+            {!isOwner && listing.status === 'active' && (
+              <button
+                type="button"
+                onClick={() => void handleMessageSeller()}
+                className="mt-4 w-full rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+              >
+                Message seller
+              </button>
+            )}
           </div>
         </div>
       </div>

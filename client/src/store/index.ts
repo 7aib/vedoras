@@ -4,6 +4,7 @@ import authReducer from './slices/authSlice';
 import listingReducer from './slices/listingSlice';
 import categoryReducer from './slices/categorySlice';
 import favoriteReducer from './slices/favoriteSlice';
+import chatReducer from './slices/chatSlice';
 
 /**
  * Global Redux store.
@@ -16,6 +17,7 @@ export const store = configureStore({
     listings: listingReducer,
     categories: categoryReducer,
     favorites: favoriteReducer,
+    chat: chatReducer,
   },
   devTools: import.meta.env.DEV,
 });

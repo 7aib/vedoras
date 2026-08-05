@@ -2,6 +2,7 @@ import { Link, NavLink, useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { useAuth } from '@/hooks/useAuth';
+import { useAppSelector } from '@/store/hooks';
 import { cn } from '@/utils/cn';
 
 const navLinks = [{ to: '/listings', label: 'Browse' }];
@@ -18,6 +19,9 @@ function initialsOf(name: string): string {
 export function Navbar() {
   const { isDark, toggle } = useDarkMode();
   const { isAuthenticated, isInitializing, user, logout } = useAuth();
+  const totalUnread = useAppSelector((state) =>
+    state.chat.conversations.items.reduce((sum, conversation) => sum + conversation.unreadCount, 0),
+  );
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -89,6 +93,32 @@ export function Navbar() {
                     className="hidden rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700 sm:block"
                   >
                     Post ad
+                  </Link>
+                  <Link
+                    to="/chat"
+                    title="Messages"
+                    aria-label="Messages"
+                    className="relative grid size-9 place-items-center rounded-full text-gray-600 transition-colors hover:bg-gray-100 hover:text-brand-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                  >
+                    <svg
+                      className="size-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.8"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
+                      />
+                    </svg>
+                    {totalUnread > 0 && (
+                      <span className="absolute -right-0.5 -top-0.5 grid min-w-5 place-items-center rounded-full bg-brand-600 px-1 text-[11px] font-bold leading-5 text-white">
+                        {totalUnread > 99 ? '99+' : totalUnread}
+                      </span>
+                    )}
                   </Link>
                   <Link
                     to="/favorites"

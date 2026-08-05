@@ -7,6 +7,7 @@ import { AppRoutes } from '@/routes';
 import { router } from '@/routes/router';
 import { fetchMe, setUnauthenticated } from '@/store/slices/authSlice';
 import { authBus, tokenStorage } from '@/services/tokenStorage';
+import { SocketLifecycle } from '@/components/chat/SocketLifecycle';
 
 function AuthBootstrap() {
   const dispatch = useAppDispatch();
@@ -31,6 +32,7 @@ export default function App() {
   return (
     <Provider store={store}>
       <AuthBootstrap />
+      <SocketLifecycle />
       <AppRoutes />
       <Toaster
         position="top-center"

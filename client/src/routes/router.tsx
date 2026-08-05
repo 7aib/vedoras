@@ -11,6 +11,8 @@ import { BrowseListingsPage } from '@/pages/listings/BrowseListings';
 import { ListingDetailPage } from '@/pages/listings/ListingDetail';
 import { ListingFormPage } from '@/pages/listings/ListingForm';
 import { FavoritesPage } from '@/pages/listings/Favorites';
+import { InboxPage } from '@/pages/chat/Inbox';
+import { ConversationPage } from '@/pages/chat/Conversation';
 
 export const router = createBrowserRouter([
   {
@@ -37,6 +39,8 @@ export const router = createBrowserRouter([
         children: [
           { path: 'account', element: <AccountPage /> },
           { path: 'favorites', element: <FavoritesPage /> },
+          { path: 'chat', element: <InboxPage /> },
+          { path: 'chat/:id', element: <ConversationPage /> },
           { path: 'listings/new', element: <ListingFormPage mode="create" /> },
           { path: 'listings/:id/edit', element: <ListingFormPage mode="edit" /> },
         ],
