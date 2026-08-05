@@ -25,8 +25,10 @@ interface ReadAck {
 }
 
 const socketUrl = (() => {
+  const socketUrlRaw = import.meta.env.VITE_SOCKET_URL as string | undefined;
+  if (socketUrlRaw) return socketUrlRaw;
   const apiUrl = import.meta.env.VITE_API_URL as string | undefined;
-  return apiUrl ? new URL(apiUrl).origin : window.location.origin;
+  return apiUrl ? new URL(apiUrl, window.location.origin).origin : window.location.origin;
 })();
 
 /**
