@@ -147,6 +147,16 @@ export function Navbar() {
                       </span>
                     )}
                   </Link>
+                  {user.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      title="Admin dashboard"
+                      aria-label="Admin dashboard"
+                      className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-brand-600 transition-colors hover:bg-brand-50 hover:text-brand-700 md:block dark:text-brand-400 dark:hover:bg-brand-900/30 dark:hover:text-brand-300"
+                    >
+                      Admin
+                    </Link>
+                  )}
                   <Link
                     to="/favorites"
                     title="Your favorites"

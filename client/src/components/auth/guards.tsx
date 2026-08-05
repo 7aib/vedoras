@@ -22,3 +22,18 @@ export function GuestOnly() {
   if (isAuthenticated) return <Navigate to="/" replace />;
   return <Outlet />;
 }
+
+/** Redirects non-admin users to the account page. */
+export function RequireAdmin() {
+  const { isAuthenticated, isInitializing, user } = useAuth();
+  const location = useLocation();
+
+  if (isInitializing) return <PageLoader />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  if (user?.role !== 'admin') {
+    return <Navigate to="/account" replace />;
+  }
+  return <Outlet />;
+}

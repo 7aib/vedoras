@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import { PublicLayout } from '@/layouts/PublicLayout';
 import { AuthLayout } from '@/layouts/AuthLayout';
-import { RequireAuth, GuestOnly } from '@/components/auth/guards';
+import { RequireAuth, RequireAdmin, GuestOnly } from '@/components/auth/guards';
 import { HomePage } from '@/pages/Home';
 import { NotFoundPage } from '@/pages/NotFound';
 import { LoginPage } from '@/pages/auth/Login';
@@ -14,6 +14,10 @@ import { FavoritesPage } from '@/pages/listings/Favorites';
 import { InboxPage } from '@/pages/chat/Inbox';
 import { ConversationPage } from '@/pages/chat/Conversation';
 import { NotificationsPage } from '@/pages/notifications/Notifications';
+import { AdminLayout } from '@/pages/admin/AdminLayout';
+import { AdminDashboard } from '@/pages/admin/AdminDashboard';
+import { AdminUsers } from '@/pages/admin/AdminUsers';
+import { AdminListings } from '@/pages/admin/AdminListings';
 
 export const router = createBrowserRouter([
   {
@@ -45,6 +49,19 @@ export const router = createBrowserRouter([
           { path: 'notifications', element: <NotificationsPage /> },
           { path: 'listings/new', element: <ListingFormPage mode="create" /> },
           { path: 'listings/:id/edit', element: <ListingFormPage mode="edit" /> },
+          {
+            element: <RequireAdmin />,
+            children: [
+              {
+                element: <AdminLayout />,
+                children: [
+                  { index: true, path: 'admin', element: <AdminDashboard /> },
+                  { path: 'admin/users', element: <AdminUsers /> },
+                  { path: 'admin/listings', element: <AdminListings /> },
+                ],
+              },
+            ],
+          },
         ],
       },
       { path: '*', element: <NotFoundPage /> },
