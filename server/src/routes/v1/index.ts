@@ -8,6 +8,7 @@ import uploadRoutes from './upload.routes.js';
 import favoriteRoutes from './favorite.routes.js';
 import chatRoutes from './chat.routes.js';
 import notificationRoutes from './notification.routes.js';
+import adminRoutes from './admin.routes.js';
 
 const router = Router();
 
@@ -27,5 +28,6 @@ router.use(uploadRoutes);
 router.use(favoriteRoutes);
 router.use(chatRoutes);
 router.use(notificationRoutes);
+router.use(adminRoutes);
 
 export default router;
