@@ -9,7 +9,7 @@
     "server"
   ],
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.22.0"
   },
   "scripts": {
     "dev": "concurrently -n server,client -c blue,green \"npm:dev --workspace=server\" \"npm:dev --workspace=client\"",
@@ -23,7 +23,7 @@
     "typecheck": "npm run typecheck --workspaces",
     "test": "npm run test --workspaces",
     "start": "npm run start --workspace=server",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "lint-staged": {
     "server/**/*.{ts,js}": [

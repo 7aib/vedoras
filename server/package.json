@@ -5,6 +5,9 @@
   "description": "Vedoras REST API — Node.js, Express, TypeScript, MongoDB",
   "type": "module",
   "main": "dist/index.js",
+  "engines": {
+    "node": ">=22.22.0"
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.build.json",
