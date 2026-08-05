@@ -13,6 +13,7 @@ import { ListingFormPage } from '@/pages/listings/ListingForm';
 import { FavoritesPage } from '@/pages/listings/Favorites';
 import { InboxPage } from '@/pages/chat/Inbox';
 import { ConversationPage } from '@/pages/chat/Conversation';
+import { NotificationsPage } from '@/pages/notifications/Notifications';
 
 export const router = createBrowserRouter([
   {
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
           { path: 'favorites', element: <FavoritesPage /> },
           { path: 'chat', element: <InboxPage /> },
           { path: 'chat/:id', element: <ConversationPage /> },
+          { path: 'notifications', element: <NotificationsPage /> },
           { path: 'listings/new', element: <ListingFormPage mode="create" /> },
           { path: 'listings/:id/edit', element: <ListingFormPage mode="edit" /> },
         ],

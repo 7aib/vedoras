@@ -11,6 +11,12 @@ import {
   socketTypingStop,
 } from '@/store/slices/chatSlice';
 import type { MessageSocketPayload, ReadSocketPayload, TypingSocketPayload } from '@/types/chat';
+import {
+  fetchNotifications,
+  resetNotifications,
+  socketNotificationReceived,
+} from '@/store/slices/notificationSlice';
+import type { SafeNotification } from '@/types/notification';
 
 /**
  * Owns the chat socket lifecycle: connects with the access token once the
@@ -26,11 +32,13 @@ export function SocketLifecycle() {
     if (!isAuthenticated || !user || !accessToken) {
       chatSocket.disconnect();
       store.dispatch(resetChat());
+      store.dispatch(resetNotifications());
       return;
     }
 
     chatSocket.connect(accessToken);
     store.dispatch(fetchConversations({ page: 1, limit: 12 }));
+    store.dispatch(fetchNotifications({ page: 1, limit: 12 }));
 
     const offMessage = chatSocket.on('message:new', (payload) => {
       const event = payload as MessageSocketPayload;
@@ -55,12 +63,16 @@ export function SocketLifecycle() {
     const offTypingStop = chatSocket.on('typing:stop', (payload) => {
       store.dispatch(socketTypingStop(payload as TypingSocketPayload));
     });
+    const offNotification = chatSocket.on('notification:new', (payload) => {
+      store.dispatch(socketNotificationReceived(payload as SafeNotification));
+    });
 
     return () => {
       offMessage();
       offRead();
       offTypingStart();
       offTypingStop();
+      offNotification();
     };
   }, [isAuthenticated, isInitializing, user, accessToken]);
 

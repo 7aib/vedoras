@@ -7,6 +7,7 @@ import {
   deleteListing,
   fetchListingDetail,
   fetchRelatedListings,
+  updateListing,
 } from '@/store/slices/listingSlice';
 import { createConversation } from '@/store/slices/chatSlice';
 import { useAuth } from '@/hooks/useAuth';
@@ -105,6 +106,16 @@ export function ListingDetailPage() {
       navigate('/account');
     } catch {
       toast.error('Unable to delete the listing. Please try again.');
+    }
+  };
+
+  const handleStatusChange = async (status: 'sold' | 'active') => {
+    if (!listing) return;
+    try {
+      await dispatch(updateListing({ id: listing._id, input: { status } })).unwrap();
+      toast.success(status === 'sold' ? 'Listing marked as sold' : 'Listing reactivated');
+    } catch {
+      toast.error('Unable to update the listing. Please try again.');
     }
   };
 
@@ -220,6 +231,32 @@ export function ListingDetailPage() {
                 >
                   Edit listing
                 </Link>
+                <button
+                  type="button"
+                  onClick={() => void handleStatusChange('sold')}
+                  className="rounded-xl border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                  Mark as sold
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="rounded-xl border border-red-300 px-5 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+
+            {isOwner && listing.status === 'sold' && (
+              <div className="mt-6 flex gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => void handleStatusChange('active')}
+                  className="flex-1 rounded-xl border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                  Reactivate listing
+                </button>
                 <button
                   type="button"
                   onClick={handleDelete}

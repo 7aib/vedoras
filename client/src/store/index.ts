@@ -5,6 +5,7 @@ import listingReducer from './slices/listingSlice';
 import categoryReducer from './slices/categorySlice';
 import favoriteReducer from './slices/favoriteSlice';
 import chatReducer from './slices/chatSlice';
+import notificationReducer from './slices/notificationSlice';
 
 /**
  * Global Redux store.
@@ -18,6 +19,7 @@ export const store = configureStore({
     categories: categoryReducer,
     favorites: favoriteReducer,
     chat: chatReducer,
+    notifications: notificationReducer,
   },
   devTools: import.meta.env.DEV,
 });

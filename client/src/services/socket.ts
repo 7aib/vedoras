@@ -2,7 +2,13 @@ import { io, type Socket } from 'socket.io-client';
 import type { SafeMessage } from '@/types/chat';
 
 export type ChatSocketEvent =
-  'connect' | 'disconnect' | 'message:new' | 'conversation:read' | 'typing:start' | 'typing:stop';
+  | 'connect'
+  | 'disconnect'
+  | 'message:new'
+  | 'conversation:read'
+  | 'typing:start'
+  | 'typing:stop'
+  | 'notification:new';
 
 type ChatSocketListener = (payload: unknown) => void;
 
@@ -70,6 +76,7 @@ class ChatSocket {
     socket.on('conversation:read', (payload) => this.emit('conversation:read', payload));
     socket.on('typing:start', (payload) => this.emit('typing:start', payload));
     socket.on('typing:stop', (payload) => this.emit('typing:stop', payload));
+    socket.on('notification:new', (payload) => this.emit('notification:new', payload));
   }
 
   disconnect(): void {

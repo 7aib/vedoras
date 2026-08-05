@@ -66,7 +66,7 @@ export interface CreateListingInput {
   images?: string[];
 }
 
-export type UpdateListingInput = Partial<CreateListingInput>;
+export type UpdateListingInput = Partial<CreateListingInput> & { status?: ListingStatus };
 
 export interface ListListingsQuery {
   page?: number;
