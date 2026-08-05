@@ -16,6 +16,7 @@ import type {
 } from '../types/listing.js';
 import { getCategoryPath } from './category.service.js';
 import { enrichListings } from './favorite.service.js';
+import { notifyFavoritersOfListingStatus } from './notification.service.js';
 
 const SELLER_POPULATE = { path: 'seller', select: '-password -refreshTokens' };
 
@@ -300,6 +301,8 @@ export async function updateListing(
     updates.categoryPath = await resolveCategory(input.category);
   }
 
+  const previousStatus = listing.status as ListingStatus;
+
   const updated = await Listing.findByIdAndUpdate(id, updates, {
     new: true,
     runValidators: true,
@@ -309,6 +312,12 @@ export async function updateListing(
   if (!updated) {
     throw ApiError.notFound('Listing not found');
   }
+
+  const nextStatus = updated.status as ListingStatus;
+  if (previousStatus !== nextStatus && (nextStatus === 'sold' || nextStatus === 'removed')) {
+    await notifyFavoritersOfListingStatus(id, updated.title, userId, nextStatus);
+  }
+
   return enrichSingle(updated as unknown as ListingLean, userId);
 }
 

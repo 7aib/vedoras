@@ -7,6 +7,7 @@ import categoryRoutes from './category.routes.js';
 import uploadRoutes from './upload.routes.js';
 import favoriteRoutes from './favorite.routes.js';
 import chatRoutes from './chat.routes.js';
+import notificationRoutes from './notification.routes.js';
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.use(categoryRoutes);
 router.use(uploadRoutes);
 router.use(favoriteRoutes);
 router.use(chatRoutes);
+router.use(notificationRoutes);
 
 export default router;

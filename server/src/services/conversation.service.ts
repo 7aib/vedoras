@@ -10,6 +10,7 @@ import type {
   SafeMessage,
 } from '../types/chat.js';
 import { ApiError } from '../utils/ApiError.js';
+import { notifyUser } from './notification.service.js';
 
 const USER_SELECT = '-password -refreshTokens';
 const LISTING_PREVIEW_SELECT = 'title price currency images';
@@ -270,10 +271,24 @@ export async function sendMessage(
   });
   await Conversation.updateOne({ _id: id }, { lastMessageAt: new Date() });
 
-  const sender = await User.findById(userId).select(USER_SELECT).lean();
+  const [sender, participants] = await Promise.all([
+    User.findById(userId).select(USER_SELECT).lean(),
+    getConversationParticipants(conversationId),
+  ]);
   if (!sender) {
     throw new Error('Sender no longer exists');
   }
+
+  const recipientId = participants.find((participant) => participant !== userId);
+  if (recipientId) {
+    await notifyUser(recipientId, {
+      type: 'message',
+      title: `New message from ${sender.firstName} ${sender.lastName}`,
+      body: trimmed,
+      data: { conversationId },
+    });
+  }
+
   return toSafeMessage({
     _id: message._id,
     conversation: message.conversation,

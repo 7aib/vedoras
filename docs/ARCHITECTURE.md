@@ -177,7 +177,7 @@ client/
 | 7 | Search & filters (full-text search, faceted filters, related listings) | ✅ done |
 | 8 | Favorites                          | ✅ done |
 | 9 | Chat (Socket.io)                   | in progress |
-| 10| Notifications                      | planned |
+| 10| Notifications                      | in progress |
 | 11| Admin dashboard                    | planned |
 | 12| Performance optimization           | planned |
 | - | Final: E2E, docs, production       | planned |

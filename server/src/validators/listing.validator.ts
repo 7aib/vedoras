@@ -38,7 +38,12 @@ export const createListingSchema = z.object({
   images: z.array(imageUrlSchema).max(10, 'Max 10 images').optional(),
 });
 
-export const updateListingSchema = createListingSchema.partial().strict();
+export const updateListingSchema = createListingSchema
+  .partial()
+  .extend({
+    status: z.enum(['active', 'sold', 'removed']).optional(),
+  })
+  .strict();
 
 export const listListingsSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
