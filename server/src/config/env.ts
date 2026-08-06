@@ -32,6 +32,10 @@ const envSchema = z.object({
   COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),
   // --- Media / uploads ---
   UPLOAD_DIR: z.string().default('uploads'),
+  // Absolute path to the built client (Vite dist) to serve as a same-origin SPA
+  // alongside the API — used on shared hosting where the Node process handles
+  // every request (no reverse proxy). Unset in dev/Docker.
+  CLIENT_DIST: z.string().optional(),
   UPLOAD_MAX_FILES: z.coerce.number().int().min(1).max(10).default(10),
   UPLOAD_MAX_SIZE_MB: z.coerce.number().int().min(1).max(50).default(5),
   // Optional Cloudinary credentials. When unset, uploads fall back to local

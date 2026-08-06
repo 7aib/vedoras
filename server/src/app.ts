@@ -13,6 +13,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { requestId } from './middleware/requestId.js';
 import { createRateLimiter } from './middleware/rateLimiter.js';
 import { ensureUploadDir, uploadDir } from './middleware/upload.js';
+import { mountSpa } from './middleware/spa.js';
 import { apiRoot } from './utils/constants.js';
 
 // Morgan token exposing the correlation id assigned by requestId middleware.
@@ -76,10 +77,15 @@ export function createApp(): Express {
   // --- API routes (versioned) ---
   app.use(apiRoot, v1Routes);
 
-  // --- Health for the root path ---
-  app.get('/', (_req, res) => {
-    res.json({ success: true, message: 'Vedoras API', data: { version: env.API_VERSION } });
-  });
+  // --- Built SPA served same-origin (shared hosting without a reverse proxy) ---
+  mountSpa(app, env.CLIENT_DIST);
+
+  // --- Health for the root path (only when no SPA is mounted) ---
+  if (!env.CLIENT_DIST) {
+    app.get('/', (_req, res) => {
+      res.json({ success: true, message: 'Vedoras API', data: { version: env.API_VERSION } });
+    });
+  }
 
   // --- 404 + centralized error handling ---
   app.use(notFoundHandler);
